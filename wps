@@ -1,0 +1,195 @@
+#!/usr/bin/php5
+<?php
+
+require dirname(__FILE__) . '/lib/colours.class.php';
+
+//
+// Check that the environment we're running in is sane, and explain what's
+// wrong if it's not.
+//
+
+// PHP version
+$version_bits = explode('.', phpversion());
+
+if($version_bits[0] < 5 || $version_bits[1] < 4) {
+  exit(1);
+}
+
+// MySQL or sqlite/PDO extensions
+
+
+// Timezone
+date_default_timezone_set('UTC');
+
+
+//
+// Parse and validate arguments
+//
+
+$defaults = array(
+  'i' => 'localhost',
+  'p' => '8000',
+  "mime-file" => "/etc/mime.types",
+  "wp-root" => ".",
+);
+
+$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params"));
+
+$options = array_merge($defaults, $arguments);
+
+function die_with_error($error, $help = '') {
+  echo Colours::fg('red');
+  echo "Error: {$error}\n";
+  echo Colours::fg('white');
+
+  if(!empty($help)) {
+    echo "\n{$help}\n";
+  }
+
+  exit(1);
+}
+
+// TODO: Check if they specified any options that we don't recognise
+
+// Emit help, if required, and then exit
+if(isset($options['h']) || isset($options['help'])) {
+?>
+WPServer launches a stand-alone web server for a specific WordPress installation.
+It makes WordPress easier to develop with, for example, by adding lots of debug 
+information to the terminal without cluttering up or breaking your templates.
+
+Usage: 
+  wps [options]
+
+Options:
+  -i <interface address>  Specify an interface to listen on. (Default: localhost)
+  -p <port>               Specify a port number to listen on. (Default: 8000)
+
+  --mime-file <filename>  Specify a path to a mime.types file containg content-type
+                          rules. The most recent version of this file is available at:
+                            
+                            http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types
+
+                          should you need to obtain it. (Default: /etc/mime.types)
+
+  --wp-root <path>        Path to the WordPress installation that WPServer should 
+                          launch. (Default: .)
+
+  --no-sql                Do not display information about queries 
+  --no-templates          Do not display information about template paths
+  --no-assets             Do not display information about requests for static assets
+  --no-params             Do not display information about request query parameters
+
+<?
+
+  exit(0);
+}
+
+// Is there a mime.types file?
+if(!file_exists($options['mime-file'])) {
+  die_with_error(
+    "Unable to find file {$options['mime-file']}", 
+    "You can obtain the most recent mime file here:\n\n  http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types\n\nInstruct WPServer to use this file using the --mime-file argument.");
+}
+
+// Is the specified port sane?
+if(!preg_match('/\d+/', $options['p']) || $options['p'] > 65536 || $options['p'] < 1) {
+  die_with_error("Expected -p to give a port number between 1 and 65536");
+}
+
+// If wp-root is the current directory, set it to the absolute path
+if($options['wp-root'] == '.') {
+  $options['wp-root'] = getcwd();
+}
+
+// Make sure that the path to the wordpress root is canonical
+$options['wp-root'] = realpath($options['wp-root']);
+
+// Check that the wordpress directory exists
+if(!is_dir($options['wp-root'])) {
+  die_with_error("Unable to find directory: {$options['wp-root']}");
+}
+
+// Check that the wordpress directory contains a wordpress installation
+if(!file_exists($options['wp-root'] . '/wp-config.php')) {
+  die_with_error(
+    "Unable to find wp-config.php in your wordpress directory: {$options['wp-root']}",
+    "Is there a wordpress installation in your current directory? If not, specify the path with --wp-root"
+  );
+}
+
+
+
+
+//
+// Trap Ctrl-C so that we can say things before we quit
+//
+
+declare(ticks = 1);
+
+pcntl_signal(SIGTERM, "signal_handler");
+pcntl_signal(SIGINT, "signal_handler");
+
+function signal_handler($signal) {
+  global $options;
+
+  // Delete the settings file
+  if(file_exists(dirname(__FILE__) . '/.wpserver-arguments')) {
+    unlink(dirname(__FILE__) . '/.wpserver-arguments');
+  }
+
+  // Remove our injected code
+  $config = file($options['wp-root'] . "/wp-config.php");
+
+  $original_config = '';
+  $in_block = false;
+
+  foreach($config as $line) {
+    $line = trim($line);
+
+    if($line == '////WPSERVER START') {
+      $in_block = true;
+    }
+
+    if(!$in_block) {
+      $original_config .= "{$line}\n";
+    }
+
+    if($line == '////WPSERVER END') {
+      $in_block = false;
+    }
+  }
+
+  file_put_contents($options['wp-root'] . "/wp-config.php", $original_config);
+
+  echo "Quitting.\n";
+  exit(0);
+}
+
+
+//
+// Inject our code into WordPress
+//
+
+$fp = fopen($options['wp-root'] . "/wp-config.php", 'a');
+fputs($fp, "////WPSERVER START\nrequire('" . dirname(__FILE__) . "/lib/load_wpserver.php');\n////WPSERVER END\n");
+fclose($fp);
+
+
+//
+// Mush up the arguments and start the server
+//
+
+$valid_arguments = serialize($options);
+
+echo "WP Standalone Server started at " . date('H:i:s \o\n d-m-Y') . "\n";
+echo "Written and maintained by dxw. Visit wpserver.labs.dxw.com for more information.\n";
+echo "Found a WordPress installation at {$options['wp-root']}\n";
+echo "Listening on {$options['i']}:{$options['p']}\n";
+echo "Press Ctrl-C to quit.\n";
+
+
+passthru("echo '{$valid_arguments}' | php -S {$options['i']}:{$options['p']} " . dirname(__FILE__) . "/lib/router.php");
+
+echo "WTF are we doing here?";
+// We'll never get here.

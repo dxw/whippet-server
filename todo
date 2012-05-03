@@ -1,0 +1,5 @@
+It would be very nice if wps could operate just with a wp-content folder. Assume that wordpress core files are elsewhere and make everything hook up nicely.
+
+It would be lovely if we didn't have to use MySQL, and could use sqlite instead for dev environments.
+
+
