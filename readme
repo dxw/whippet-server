@@ -1,0 +1,21 @@
+Depends on PHP 5.4. Under Ubuntu, do:
+
+  $ sudo add-apt-repository ppa:ondrej/php5
+  $ sudo apt-get update
+  $ sudo apt-get install php5
+
+To load up a WordPress, either:
+
+  $ cd your/wordpress/root/dir
+  $ /path/to/wps
+
+Or, from the root of this repo:
+
+  $ ./wps --wp-root=/your/wordpress/root/dir
+
+Then visit http://localhost:8000. WordPress should work normally and you should see lots of output on your terminal.
+
+There are more options. For the full list, do:
+
+  $ ./wps --help 
+
