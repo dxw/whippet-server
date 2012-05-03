@@ -50,8 +50,8 @@ class WPServer {
     // file (on subsequent requests)
     //
 
-    if(file_exists(dirname(__FILE__) . "/.wpserver-arguments")) {
-      $options = file_get_contents(dirname(__FILE__) . "/.wpserver-arguments");
+    if(file_exists("/tmp/.wpserver-arguments")) {
+      $options = file_get_contents("/tmp/.wpserver-arguments");
     }
     else {
       $read = array(fopen('php://stdin', 'r'));
@@ -65,7 +65,7 @@ class WPServer {
         fclose($read[0]);
       }
 
-      file_put_contents(dirname(__FILE__) . "/.wpserver-arguments", $options);
+      file_put_contents("/tmp/.wpserver-arguments", $options);
     }
 
     // There's no need to validate here because the bootstrap script has done that.
@@ -113,6 +113,47 @@ class WPServer {
 
 
   /** 
+   * Called by the PHP core when an error occurs
+   */
+  public function handle_php_error($number, $error, $file, $line, $context) {
+
+    // Don't show errors from the WordPress core unless the user wants them
+    if(!isset($this->options['show-wp-errors']) && strpos($file, 'wp-content') === false) {
+      return true;
+    }
+
+    $error_type = array (
+      E_ERROR          => 'Error',
+      E_WARNING        => 'Warning',
+      E_PARSE          => 'Parsing error',
+      E_NOTICE         => 'Notice',
+      E_CORE_ERROR     => 'Core error',
+      E_CORE_WARNING   => 'Core warning',
+      E_COMPILE_ERROR  => 'Compile error',
+      E_COMPILE_WARNING => 'Compile warning',
+      E_USER_ERROR     => 'User error',
+      E_USER_WARNING   => 'User warning',
+      E_USER_NOTICE    => 'User notice',
+      E_STRICT         => 'Strict notice',
+      E_RECOVERABLE_ERROR  => 'Recoverable error'
+    );
+
+    $this->message(
+      Colours::fg('bold_red') .
+      $error_type[$number] . 
+      Colours::fg('red') .
+      ": " .
+      $error .
+      Colours::fg('brown') .
+      " in " .
+      str_replace($this->options['wp-root'], '', $file) .
+      " at {$line}"
+    );
+      
+    return true;
+  }
+
+  /** 
    * Called when the command is run. Sets up the options and environment and  
    * then passes off to a more specific handler
    */
@@ -136,6 +177,9 @@ class WPServer {
     // If you don't set this, WordPress adds index.php into all the links.
     $_SERVER['SERVER_SOFTWARE'] = 'Apache';
 
+    // Set up a custom error handler so that we can make errors and notices purty
+    set_error_handler(array($this, "handle_php_error"), E_ALL);
+
     //
     // What sort of request is this?
     //
@@ -155,7 +199,6 @@ class WPServer {
       }
 
       // If not, assume it's a static asset
-
       if(!isset($this->options['no-assets'])) {
         $this->request_message();
         $this->message("Serving asset {$this->request_uri['path']}\n");
@@ -288,7 +331,56 @@ class WPServer {
       return $template;
     }
 
-    $this->message(Colours::fg('yellow') . "Template load: " . Colours::fg('white')  .  str_replace($this->options['wp-root'], '', $template));
+    //
+    // Try to work out what the template is
+    //
+
+    $want_template = '';
+    $got_template  = '';
+
+    if     ( is_404()            ): $want_template = '404';
+    elseif ( is_search()         ): $want_template = 'Search';
+    elseif ( is_tax()            ): $want_template = 'Taxonomy';
+    elseif ( is_front_page()     ): $want_template = 'Front page';
+    elseif ( is_home()           ): $want_template = 'Home';
+    elseif ( is_attachment()     ): $want_template = 'Attachment';
+    elseif ( is_single()         ): $want_template = 'Single';
+    elseif ( is_page()           ): $want_template = 'Page';
+    elseif ( is_category()       ): $want_template = 'Category';
+    elseif ( is_tag()            ): $want_template = 'Tag';
+    elseif ( is_author()         ): $want_template = 'Author';
+    elseif ( is_date()           ): $want_template = 'Date';
+    elseif ( is_archive()        ): $want_template = 'Archive';
+    elseif ( is_comments_popup() ): $want_template = 'Comments popup';
+    elseif ( is_paged()          ): $want_template = 'Paged';
+    endif;
+
+
+    if     ( $template == get_404_template()            ) : $got_template = '404';
+    elseif ( $template == get_search_template()         ) : $got_template = 'Search';
+    elseif ( $template == get_taxonomy_template()       ) : $got_template = 'Taxonomy';
+    elseif ( $template == get_front_page_template()     ) : $got_template = 'Front page';
+    elseif ( $template == get_home_template()           ) : $got_template = 'Home';
+    elseif ( $template == get_attachment_template()     ) : $got_template = 'Attachment';
+    elseif ( $template == get_single_template()         ) : $got_template = 'Single';
+    elseif ( $template == get_page_template()           ) : $got_template = 'Page';
+    elseif ( $template == get_category_template()       ) : $got_template = 'Category';
+    elseif ( $template == get_tag_template()            ) : $got_template = 'Tag';
+    elseif ( $template == get_author_template()         ) : $got_template = 'Author';
+    elseif ( $template == get_date_template()           ) : $got_template = 'Date';
+    elseif ( $template == get_archive_template()        ) : $got_template = 'Archive';
+    elseif ( $template == get_comments_popup_template() ) : $got_template = 'Comments popup';
+    elseif ( $template == get_paged_template()          ) : $got_template = 'Paged';
+    elseif ( $template == get_index_template()          ) : $got_template = 'Index';
+    else                                                  : $got_template = 'Unknown';
+    endif;
+
+    $this->message(
+      Colours::fg('yellow') . 
+      "Template load: " . 
+      Colours::fg('white') . 
+      "wanted {$want_template}, got {$got_template} (" . str_replace($this->options['wp-root'], '', $template) . ")"
+    );
 
     return $template;
   }

@@ -13,8 +13,8 @@ define('SAVEQUERIES', true);
 
 
 // Add the filters that we want.
-add_filter("query", array($wps, "wps_filter_query"), 0, 1);
-add_filter("template_include", array($wps, "wps_filter_template_include"), 0, 1);
-add_filter("parse_query", array($wps, "wps_filter_parse_query"), 0, 1);
+add_filter("query", array($wps, "wps_filter_query"), 9999, 1);
+add_filter("template_include", array($wps, "wps_filter_template_include"), 9999, 1);
+add_filter("parse_query", array($wps, "wps_filter_parse_query"), 9999, 1);
 
-add_action("shutdown", array($wps, "wps_filter_shutdown"));
+add_action("shutdown", array($wps, "wps_filter_shutdown"), 9999);
