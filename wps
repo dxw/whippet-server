@@ -167,6 +167,10 @@ elseif(file_exists($options['wp-root'] . '/themes') && file_exists($options['wp-
    * putting it into a WordPress installation. You can put anything here that
    * you would normally put into wp-config.php.
    *
+   * At a minimum, this file must contain working database details for the sites
+   * that you're trying to run. There's no need to add the rest of the default
+   * values, but you can if you like, or if you need to change them.
+   *
    * Note: WP_DEBUG has no effect when running sites using wpserver.
    */
 
@@ -183,20 +187,15 @@ elseif(file_exists($options['wp-root'] . '/themes') && file_exists($options['wp-
   define('DB_HOST', 'localhost');
 EOT;
 
-  $skeleton_file_hash = md5($skeleton_wpserver_wpconfig);
-
   // Make sure there's a config we can use
-  if(
-    !file_exists($options['wp-root'] . "/wpserver-wp-config.php") ||
-    md5(file_get_contents("{$options['wp-root']}/wpserver-wp-config.php")) == $skeleton_file_hash
-    ) {
+  if(!file_exists($options['wp-root'] . "/wpserver-wp-config.php")) {
     echo 
       Colours::fg('red') . "Error: " . Colours::fg('white') . 
-      "Couldn't find a configuration file at " . $options['wp-root'] . "/wpserver-wp-config.php,\n" . 
-      "or a file is there but has not been edited.\n\n".
+      "Couldn't find a configuration file at " . $options['wp-root'] . "/wpserver-wp-config.php\n" . 
       "WPServer needs this file in order to know where your database is. You can specify anything\n" .
       "there that you would normally put in wp-config.php. At a minimum, it must contain your\n" .
-      "database configuration. Would you like to create this file now?\n\nCreate and edit file? [Y/n] "
+      "database configuration. Once it's created, you might want to add it to your source\n" .
+      "control software's ignores file. Would you like to create this file now?\n\nCreate and edit file? [Y/n] "
     ;
 
     $fp = fopen("php://stdin", 'r');
@@ -404,22 +403,59 @@ if(WPS_LOCATION == 'root') {
   file_put_contents("/tmp/.wpserver-original-wp-config", $wp_config);
 }
 else if(WPS_LOCATION == 'wp-content') {
-  $new_wp_config = file_get_contents("{$options['wp-content']}/wpserver-wp-config.php") . <<<EOT
-define('DB_CHARSET', 'utf8');
-define('DB_COLLATE', '');
-define('AUTH_KEY',         'put your unique phrase here');
-define('SECURE_AUTH_KEY',  'put your unique phrase here');
-define('LOGGED_IN_KEY',    'put your unique phrase here');
-define('NONCE_KEY',        'put your unique phrase here');
-define('AUTH_SALT',        'put your unique phrase here');
-define('SECURE_AUTH_SALT', 'put your unique phrase here');
-define('LOGGED_IN_SALT',   'put your unique phrase here');
-define('NONCE_SALT',       'put your unique phrase here');
-\$table_prefix  = 'wp_';
-define('WPLANG', '');
-if ( !defined('ABSPATH') )
-  define('ABSPATH', dirname(__FILE__) . '/');
-EOT;
+  $new_wp_config = file_get_contents("{$options['wp-content']}/wpserver-wp-config.php");
+
+  if(strpos('DB_CHARSET', $new_wp_config) === false) {
+    $new_wp_config .= "define('DB_CHARSET', 'utf8');\n";
+  }
+
+  if(strpos('DB_COLLAGE', $new_wp_config) === false) {
+    $new_wp_config .= "define('DB_COLLATE', '');\n";
+  }
+
+  if(strpos('AUTH_KEY', $new_wp_config) === false) {
+    $new_wp_config .= "define('AUTH_KEY',         'put your unique phrase here');\n";
+  }
+
+  if(strpos('SECURE_AUTH_KEY', $new_wp_config) === false) {
+    $new_wp_config .= "define('SECURE_AUTH_KEY',  'put your unique phrase here');\n";
+  }
+
+  if(strpos('LOGGED_IN_KEY', $new_wp_config) === false) {
+    $new_wp_config .= "define('LOGGED_IN_KEY',    'put your unique phrase here');\n";
+  }
+
+  if(strpos('NONCE_KEY', $new_wp_config) === false) {
+    $new_wp_config .= "define('NONCE_KEY',        'put your unique phrase here');\n";
+  }
+
+  if(strpos('AUTH_SALT', $new_wp_config) === false) {
+    $new_wp_config .= "define('AUTH_SALT',        'put your unique phrase here');\n";
+  }
+
+  if(strpos('SECURE_AUTH_SALT', $new_wp_config) === false) {
+    $new_wp_config .= "define('SECURE_AUTH_SALT', 'put your unique phrase here');\n";
+  }
+
+  if(strpos('LOGGED_IN_SALT', $new_wp_config) === false) {
+    $new_wp_config .= "define('LOGGED_IN_SALT',   'put your unique phrase here');\n";
+  }
+
+  if(strpos('NONCE_SALT', $new_wp_config) === false) {
+    $new_wp_config .= "define('NONCE_SALT',       'put your unique phrase here');\n";
+  }
+
+  if(strpos('table_prefix', $new_wp_config) === false) {
+    $new_wp_config .= "\$table_prefix  = 'wp_';\n";
+  }
+
+  if(strpos('WPLANG', $new_wp_config) === false) {
+    $new_wp_config .= "define('WPLANG', '');\n";
+  }
+
+  if(strpos('ABSPATH', $new_wp_config) === false) {
+    $new_wp_config .= "if ( !defined('ABSPATH') )\ndefine('ABSPATH', dirname(__FILE__) . '/');\n";
+  }
 
   $new_wp_config .= $inject;
 
