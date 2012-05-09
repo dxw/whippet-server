@@ -1,6 +1,4 @@
-wps uses 100% cpu. Whaaa
-
-It would be very nice if wps could operate just with a wp-content folder. Assume that wordpress core files are elsewhere and make everything hook up nicely.
+wps uses 100% cpu. Whaaaaaat
 
 It would be lovely if we didn't have to use MySQL, and could use sqlite instead for dev environments.
 
@@ -13,3 +11,5 @@ Show specified filters being executed
 Make the location for temporary files configurable (a define will probably do)
 
 Remove all the echo calls from wps and use WPServer::message instead
+
+Refactor wps, moving some stuff into other files where that's sensible (eg options parsing/help/checking), making it OO (and DRYer), and paying particular attention to all the filenames and paths that are floating around
