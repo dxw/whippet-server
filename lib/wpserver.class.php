@@ -13,10 +13,8 @@ class WPServer {
 
   /* Stores the absolute path to the requested resource.
    *
-   * Note: This is not always sane. For a request for a real resource (like a 
-   * css file) it should be a path to an existing file. 
-   *
-   * For a request for a WordPress page, it will not be.
+   * Note: For a request for a real resource (like a css file) it should be a 
+   * path to an existing file. For a request for a WordPress page, it will not be.
   */
   public $request_path; 
 
@@ -83,7 +81,7 @@ class WPServer {
    *
    * @param String The message
    */
-  public function message($string) {
+  public static function message($string) {
     if($string[0] == "\n") {
       $string = substr($string, 1);
       file_put_contents("php://stdout", "\n");
@@ -91,7 +89,8 @@ class WPServer {
 
     file_put_contents("php://stdout", 
       Colours::fg('dark_grey') . "[" . date("Y-m-d H:i:s") . "]" .
-      Colours::fg('white') . " {$string}\n");
+      Colours::fg('white') . " {$string}" . 
+      Colours::fg('white') . "\n" );
   }
 
   
@@ -111,17 +110,12 @@ class WPServer {
     $this->message("\nStarted {$_SERVER['REQUEST_METHOD']} " . Colours::fg('green') . "\"{$_SERVER['REQUEST_URI']}\"" . Colours::fg('white') . " for {$_SERVER['REMOTE_ADDR']}");
   }
 
-
   /** 
-   * Called by the PHP core when an error occurs
+   * This function actually emits handled PHP errors. It's here instead of
+   * in handle_php_error because we want a static version to be used from
+   * the bootstrap script.
    */
-  public function handle_php_error($number, $error, $file, $line, $context) {
-
-    // Don't show errors from the WordPress core unless the user wants them
-    if(!isset($this->options['show-wp-errors']) && strpos($file, 'wp-content') === false) {
-      return true;
-    }
-
+  static public function emit_php_error($number, $error, $file, $line) {
     $error_type = array (
       E_ERROR          => 'Error',
       E_WARNING        => 'Warning',
@@ -135,10 +129,17 @@ class WPServer {
       E_USER_WARNING   => 'User warning',
       E_USER_NOTICE    => 'User notice',
       E_STRICT         => 'Strict notice',
-      E_RECOVERABLE_ERROR  => 'Recoverable error'
+      E_RECOVERABLE_ERROR  => 'Recoverable error',
+      E_DEPRECATED     => 'Deprecated',
+      E_USER_DEPRECATED     => 'Deprecated',
     );
 
-    $this->message(
+    if(!$error_type[$number]) {
+      $error_type[$number] = $number;
+    }
+
+
+    WPServer::message(
       Colours::fg('bold_red') .
       $error_type[$number] . 
       Colours::fg('red') .
@@ -146,10 +147,28 @@ class WPServer {
       $error .
       Colours::fg('brown') .
       " in " .
-      str_replace($this->options['wp-root'], '', $file) .
-      " at {$line}"
+      $file .
+      " at line {$line}" .
+      Colours::fg("white")
     );
-      
+  }
+
+  /** 
+   * Called by the PHP core when an error occurs
+   */
+  public function handle_php_error($number, $error, $file, $line, $context) {
+
+    // Don't show errors from the WordPress core unless the user wants them
+    // Note: Changes made to these conditions should also be made in the output
+    // filters section in the bootstrap script
+    if(!isset($this->options['show-wp-errors']) && strpos($file, 'wp-content') === false && strpos($file, 'wp-config.php') === false) {
+      return true;
+    }
+
+    $file = str_replace($this->options['wp-root'], '', $file);
+
+    $this->emit_php_error($number, $error, $file, $line);
+
     return true;
   }
 
@@ -191,7 +210,7 @@ class WPServer {
     if($this->request_uri['path'] != '/' && file_exists($this->request_path)) {
       
       // If so, is it PHP that we need to execute?
-      if(preg_match('/\.php$/', $this->request_path)) {
+      if(preg_match('/\.php$/', $this->request_path) && !isset($this->options['no-scripts'])) {
         $this->request_message();
         $this->message("Serving script {$this->request_path}");
 
@@ -236,8 +255,8 @@ class WPServer {
     // Work out what the content type is
     //
 
-    // TODO: is it safe to assume UTF-8?
-    $content_type = "text/html; charset=UTF-8";
+    // I don't think we need to send this, because WordPress will set it.
+    //$content_type = "text/html; charset=UTF-8";
 
     $extension = substr(strrchr($this->request_path, '.'), 1);
 
