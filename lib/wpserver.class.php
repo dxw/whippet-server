@@ -440,6 +440,107 @@ class WPServer {
     $this->message("Completed request in {$wordpress_time}s ({$num_queries} queries took {$query_time}s)");
   }
 
+  /**
+   * Emits the details of hooks and filters as they are called, if required
+   */
+  public function wps_filter_all($hook, $params) {
+    global $wp_filter;
+
+    $display = false;
+
+    foreach($this->options['show-hooks'] as $show) {
+      if(preg_match("/^{$show}$/", $hook)) {
+        $display = true;
+        break;
+      }
+    }
+
+    if(!$display) {
+      return;
+    }
+
+    $type = '';
+    $caller = '';
+
+    $backtrace = debug_backtrace();
+    foreach($backtrace as $i => $value) {
+      if($value['function'] == 'apply_filters' || $value['function'] == 'do_action') {
+        $caller = $backtrace[$i + 1];
+        
+        if($value['function'] == 'apply_filters') {
+          $type = "Filter";
+        }
+        else {
+          $type = "Action";
+        }
+
+        break;
+      }
+    }
+
+    $message = Colours::fg('cyan') . "Hook triggered: " . Colours::fg('white') . "{$type} " . Colours::fg('cyan') . "{$hook}" . Colours::fg('white') . " called from function " . Colours::fg('cyan') . "{$caller['function']}";
+
+    if(!empty($caller['file'])) {
+      $message .= Colours::fg('brown') . " in {$caller['file']}";
+    }
+
+    if(!empty($caller['line'])) {
+      $message .= " at line {$caller['line']}";
+    }
+
+    $this->message("{$message}" . Colours::fg('white'));
+
+    if(count($wp_filter[$hook])) {
+      $this->message("The following callback functions will execute:");
+
+      
+      $hooks = $wp_filter[$hook];
+
+      ksort($hooks, SORT_NUMERIC);
+
+      foreach($hooks as $priority => $callbacks) {
+
+
+        foreach($callbacks as $callback) {
+
+          if(is_array($callback['function'])) {
+            $function = $callback['function'][1];
+          }
+          else{
+            $function = $callback['function'];
+          }
+
+          $message =  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
+
+          $file = exec("grep -rn 'function {$function}' {$this->options['wp-root']}/*");
+
+          if(empty($file)) {
+            $file = exec("grep -rn 'function {$function}' {$this->options['wp-content']}/*");
+          }
+
+          if(!empty($file)) {
+            // /home/harry/Code/wpserver/wordpresses/latest/wp-includes/functions.php:function wp_ob_end_flush_all() {
+
+
+            $file = str_replace($this->options['wp-root'], '', $file);
+            $file = str_replace($this->options['wp-content'], '', $file);
+
+            if(preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
+              $message .= Colours::fg("brown") . " in {$matches[1]} at line {$matches[2]}";
+            }
+          }
+
+          $this->message($message);
+        }
+      }
+
+      $this->message(Colours::fg('white') . "\n");
+    }
+    else {
+      $this->message("No callback functions are defined\n");
+    }
+  }
+
   /** 
    * Emits page parameters
    */

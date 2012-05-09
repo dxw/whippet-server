@@ -42,9 +42,10 @@ $defaults = array(
   "wp-root" => ".",
   "wp-version" => "latest",
   "show-errors" => E_ALL,
+  "show-hooks" =>'',
 );
 
-$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params", "no-scripts", "show-wp-errors", "show-errors:", "wp-version:"));
+$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params", "no-scripts", "show-wp-errors", "show-errors:", "wp-version:", "show-hooks:"));
 
 $options = array_merge($defaults, $arguments);
 
@@ -102,6 +103,17 @@ Options:
 
                           (Default: latest)
 
+  --show-hooks <hooks>    When set, WPServer will watch for calls to the specified hooks and display
+                          them on the console. For example:
+
+                            --show-hooks init,admin_menu
+
+                          You can also use regexs:
+
+                            --show-hooks 'wp_.*'
+
+                          You probably shouldn't try to put a comma in a regex. (Default: none)
+
   --no-sql                Do not display information about queries 
   --no-templates          Do not display information about template paths
   --no-assets             Do not display information about requests for static assets
@@ -133,6 +145,11 @@ if(!preg_match('/\d+/', $options['p']) || $options['p'] > 65536 || $options['p']
 if($options['wp-root'] == '.') {
   $options['wp-root'] = getcwd();
 }
+
+// Convert --show-hooks into an array
+$show_hooks = explode(',', $options['show-hooks']);
+$show_hooks = array_map('trim', $show_hooks);
+$options['show-hooks'] = $show_hooks;
 
 // Make sure that the path to the wordpress root is canonical
 $options['wp-root'] = realpath($options['wp-root']);

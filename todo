@@ -13,3 +13,9 @@ Make the location for temporary files configurable (a define will probably do)
 Remove all the echo calls from wps and use WPServer::message instead
 
 Refactor wps, moving some stuff into other files where that's sensible (eg options parsing/help/checking), making it OO (and DRYer), and paying particular attention to all the filenames and paths that are floating around
+
+When callbacks are listed, multiple callbacks of the same priority get erroneously reordered. They should stay in the order they were added in.
+
+It would be good to cache the callback file:line grep calls into a temp file as they're quite slow.
+
+We should check that grep is available before attempting to run it
