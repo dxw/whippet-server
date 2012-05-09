@@ -24,7 +24,7 @@ if($version_bits[0] < 5 || $version_bits[1] < 4) {
 $output = array();
 exec("which notify-send", $output);
 if(file_exists(trim($output[0]))) {
-  define("WPS_GOT_LIBNOTIFY", trim($output[0]));
+  define("WPS_LIBNOTIFY_PATH", trim($output[0]));
 }
 
 // Timezone
@@ -40,10 +40,11 @@ $defaults = array(
   'p' => '8000',
   "mime-file" => "/etc/mime.types",
   "wp-root" => ".",
+  "wp-version" => "latest",
   "show-errors" => E_ALL,
 );
 
-$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params", "no-scripts", "show-wp-errors", "show-errors:"));
+$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params", "no-scripts", "show-wp-errors", "show-errors:", "wp-version:"));
 
 $options = array_merge($defaults, $arguments);
 
@@ -82,8 +83,8 @@ Options:
 
                           should you need to obtain it. (Default: /etc/mime.types)
 
-  --wp-root <path>        Path to the WordPress installation that WPServer should 
-                          launch. (Default: .)
+  --wp-root <path>        Path to the WordPress installation or wp-content directory that 
+                          WPServer should launch. (Default: .)
 
   --show-errors <errors>  A specification of PHP error types to be displayed. You can use any 
                           specification that you might normally use for error_reporting, 
@@ -92,6 +93,14 @@ Options:
                             --show-errors "E_ALL & ~E_STRICT"
 
                           (Default: E_ALL)
+
+  --wp-version <version>  When running WPServer on a wp-content directory, specifies the version
+                          of WordPress that should be loaded. The core files for this version must
+                          be present at:
+
+                          <?= dirname(__FILE__) ?>/wordpresses/<version>
+
+                          (Default: latest)
 
   --no-sql                Do not display information about queries 
   --no-templates          Do not display information about template paths
@@ -128,17 +137,157 @@ if($options['wp-root'] == '.') {
 // Make sure that the path to the wordpress root is canonical
 $options['wp-root'] = realpath($options['wp-root']);
 
+// Now that we have a root, figure out what it points to.
+// If a wordpress folder, assume everything is standard
+// If a wp-content folder, assume that there is no WP folder and
+// that we need to twiddle things around
+if(file_exists($options['wp-root'] . '/wp-config.php') && file_exists($options['wp-root'] . '/wp-includes')) {
+  //
+  // We are in a WordPress root.
+  //
+
+  define("WPS_LOCATION", "root");
+}
+elseif(file_exists($options['wp-root'] . '/themes') && file_exists($options['wp-root'] . '/plugins')){
+  //
+  // We are in a wp-content 
+  //
+  // We need to find a WP core to use, and inject some extra things into the 
+  // loader to tell WP where to find wp-content
+  // 
+
+  // Remember where we are
+  define("WPS_LOCATION", "wp-content");
+
+  $skeleton_wpserver_wpconfig = <<<EOT
+  <?php 
+
+  /**
+   * This file is used by wpserver when you run this wp-content folder without
+   * putting it into a WordPress installation. You can put anything here that
+   * you would normally put into wp-config.php.
+   *
+   * Note: WP_DEBUG has no effect when running sites using wpserver.
+   */
+
+  /** The name of the database for WordPress */
+  define('DB_NAME', 'wordpress');
+
+  /** MySQL database username */
+  define('DB_USER', 'root');
+
+  /** MySQL database password */
+  define('DB_PASSWORD', '');
+
+  /** MySQL hostname */
+  define('DB_HOST', 'localhost');
+EOT;
+
+  $skeleton_file_hash = md5($skeleton_wpserver_wpconfig);
+
+  // Make sure there's a config we can use
+  if(
+    !file_exists($options['wp-root'] . "/wpserver-wp-config.php") ||
+    md5(file_get_contents("{$options['wp-root']}/wpserver-wp-config.php")) == $skeleton_file_hash
+    ) {
+    echo 
+      Colours::fg('red') . "Error: " . Colours::fg('white') . 
+      "Couldn't find a configuration file at " . $options['wp-root'] . "/wpserver-wp-config.php,\n" . 
+      "or a file is there but has not been edited.\n\n".
+      "WPServer needs this file in order to know where your database is. You can specify anything\n" .
+      "there that you would normally put in wp-config.php. At a minimum, it must contain your\n" .
+      "database configuration. Would you like to create this file now?\n\nCreate and edit file? [Y/n] "
+    ;
+
+    $fp = fopen("php://stdin", 'r');
+    do
+      $choice = trim(fgets($fp));
+    while(array_search($choice, array('Y', 'y', 'N', 'n', '')) === false);
+    fclose($fp);
+
+    if(strtolower($choice) != 'n') {
+      file_put_contents("{$options['wp-root']}/wpserver-wp-config.php", $skeleton_wpserver_wpconfig);
+
+      if(getenv("VISUAL")) {
+        system("\$VISUAL {$options['wp-root']}/wpserver-wp-config.php > `tty`");
+      }
+      else {
+        echo 
+          "Created settings file at {$options['wp-root']}/wpserver-wp-config.php, but could\n" .
+          "not load your editor because \$VISUAL is not set. Please add your database configuration\n" .
+          "to this file and restart WPServer\n";
+
+        exit(1);
+      }
+    }
+    else {
+      exit(1);
+    }
+  } 
+}
+else {
+  // We could be *anywhere*
+  die_with_error(
+    "--wp-root does not specify a WordPress installation or wp-content directory",
+    "You must specify a path to a working WordPress installation, or to a wp-content directory"
+  );
+}
+
 // Check that the wordpress directory exists
 if(!is_dir($options['wp-root'])) {
   die_with_error("Unable to find directory: {$options['wp-root']}");
 }
 
 // Check that the wordpress directory contains a wordpress installation
-if(!file_exists($options['wp-root'] . '/wp-config.php')) {
+if(WPS_LOCATION == 'root' && !file_exists($options['wp-root'] . '/wp-config.php')) {
   die_with_error(
     "Unable to find wp-config.php in your wordpress directory: {$options['wp-root']}",
     "Is there a wordpress installation in your current directory? If not, specify the path with --wp-root"
   );
+}
+
+if(WPS_LOCATION == 'wp-content' && !file_exists(dirname(__FILE__) . "/wordpresses/{$options['wp-version']}")) {
+  echo
+    Colours::fg('red') . "Error: " . Colours::fg('white') . 
+    "Unable to find the specified WordPress core in your wordpresses directory (" . dirname(__FILE__) . "/wordpresses)\n",
+    "To run a site from its wp-content folder without it being in a WordPress installation, you need to set up your\n" .
+    "core WordPress files in the directory above. WPServer can set this up for you automatically.\n\n";
+
+  if($options['wp-version'] == 'latest') {
+    echo "Attempt to download the latest version of WordPress now? [Y/n] ";
+  }
+  else {
+    echo "Attempt to download WordPress version {$options['wp-version']} now? [Y/n] ";
+  }
+
+  $fp = fopen("php://stdin", 'r');
+  do
+    $choice = trim(fgets($fp));
+  while(array_search($choice, array('Y', 'y', 'N', 'n', '')) === false);
+  fclose($fp);
+
+  if(strtolower($choice) != 'n') {
+    $tempname = tempnam("/tmp/", ".wpserver-") . "-download-wordpress-{$options['wp-version']}";
+
+    if($options['wp-version'] == 'latest') {
+      passthru("wget -O '{$tempname}' http://wordpress.org/latest.tar.gz");
+    }
+    else {
+      passthru("wget -O '{$tempname}' http://wordpress.org/wordpress-{$options['wp-version']}.tar.gz");
+    }
+
+    passthru("tar -xvf '{$tempname}' -C " . dirname(__FILE__) . "/wordpresses");
+    passthru("rm '{$tempname}'");
+    passthru("mv '" . dirname(__FILE__) . "/wordpresses/wordpress'  '" . dirname(__FILE__) . "/wordpresses/{$options['wp-version']}'");
+    passthru("rm -r '" . dirname(__FILE__) . "/wordpresses/{$options['wp-version']}/wp-content'");
+
+    if(!file_exists(dirname(__FILE__) . "/wordpresses/{$options['wp-version']}")) {
+      die_with_error("Tried to download WordPress, but something went wrong.", "Please download the version of WordPress you'd like to use, and extract it to " . dirname(__FILE__) . "/wordpresses/<version>");
+    }
+  } 
+  else {
+    exit(1);
+  }
 }
 
 // Convert the show-errors field to something useful
@@ -147,7 +296,8 @@ $show_errors = @eval("return {$options['show-errors']};");
 if($show_errors === false) {
   die_with_error(
     "Unable to evaluate error specification: {$options['show-errors']}",
-    "The specification must be valid PHP code that identifies a set of errors to be displayed.\nSee the manual for more information: http://php.net/manual/en/function.error-reporting.php"
+    "The specification must be valid PHP code that identifies a set of errors to be displayed.\n" .
+    "See the manual for more information: http://php.net/manual/en/function.error-reporting.php"
   );
 }
 else {
@@ -156,8 +306,8 @@ else {
 
 
 // Libnotify?
-if(defined('WPS_GOT_LIBNOTIFY')) {
-  $options['libnotify'] = WPS_GOT_LIBNOTIFY;
+if(defined('WPS_LIBNOTIFY_PATH')) {
+  $options['libnotify'] = WPS_LIBNOTIFY_PATH;
 }
 
 
@@ -179,34 +329,31 @@ function signal_handler($signal) {
   }
  
   // Delete the output buffer
-  
   if(file_exists('/tmp/.wpserver_output')) {
     unlink('/tmp/.wpserver_output');
   }
 
-  // Remove our injected code
-  $config = file($options['wp-root'] . "/wp-config.php");
+  // Restore original wp-config
+  if(WPS_LOCATION == 'root') {
+    if(file_exists('/tmp/.wpserver-original-wp-config')) {
+      file_put_contents($options['wp-root'] . "/wp-config.php", file_get_contents("/tmp/.wpserver-original-wp-config"));
 
-  $original_config = '';
-  $in_block = false;
-
-  foreach($config as $line) {
-    $line = trim($line);
-
-    if($line == '////WPSERVER START') {
-      $in_block = true;
+      unlink("/tmp/.wpserver-original-wp-config");
     }
-
-    if(!$in_block) {
-      $original_config .= "{$line}\n";
-    }
-
-    if($line == '////WPSERVER END') {
-      $in_block = false;
+    else {
+      if(WPS_LOCATION == 'root') {
+        WPServer::message(
+          Colours::fg('red') . "Error: " . Colours::fg('white') . "Unable to find wp-config backup file; could not restore original configuration",
+          "Your wp-config file should have been backed up at /tmp/.wpserver-original-wp-config, but\n" .
+          "it is missing or unreadable. You should edit your wp-config.php by hand to remove the\n" .
+          "WPSERVER sections.\n");
+      }
     }
   }
-
-  file_put_contents($options['wp-root'] . "/wp-config.php", $original_config);
+  else if(WPS_LOCATION == 'wp-content') {
+    unlink("{$options['wp-root']}/wp-config.php");
+    unlink("{$options['wp-root']}/wp-content");
+  }
 
   echo "\nQuitting.\n";
   exit(0);
@@ -217,10 +364,70 @@ function signal_handler($signal) {
 // Inject our code into WordPress
 //
 
-$fp = fopen($options['wp-root'] . "/wp-config.php", 'a');
-fputs($fp, "////WPSERVER START\n////You can ignore this section. It's used by wpserver to collect data and will be automatically removed when you exit wpserver.\nrequire('" . dirname(__FILE__) . "/lib/load_wpserver.php');\n////WPSERVER END\n");
-fclose($fp);
+$dir = dirname(__FILE__);
+$wp_content_fix = '';
 
+if(WPS_LOCATION == 'wp-content') {
+  $wp_content_fix .= "define('WP_CONTENT_DIR', '{$options['wp-root']}');\n";
+//  $wp_content_fix .= "define('WP_CONTENT_URL', 'http://{$options['i']}:{$options['p']}/" . basename($options['wp-root'])  . "');\n";
+
+  // Now we've done the necessary munging, move wp-root to the actual wordpress root
+  $options['wp-content'] = $options['wp-root'];
+  // TODO: Is this approach sensible?
+  $options['wp-root'] = dirname(__FILE__) . "/wordpresses/{$options['wp-version']}";
+}
+
+$inject  = <<<EOT
+////WPSERVER START
+////You can ignore these sections. They're used by wpserver to collect data and will be automatically removed when you exit wpserver.
+{$wp_content_fix}
+////WPSERVER END
+
+require_once(ABSPATH . 'wp-settings.php');
+
+////WPSERVER START
+require('{$dir}/lib/load_wpserver.php');
+////WPSERVER END
+EOT;
+
+// Get the config
+if(WPS_LOCATION == 'root') {
+  $wp_config = file_get_contents($options['wp-root'] . "/wp-config.php");
+
+  // Modify it
+  $new_wp_config = str_replace("require_once(ABSPATH . 'wp-settings.php');", $inject, $wp_config);
+
+  // Save it
+  file_put_contents($options['wp-root'] . "/wp-config.php", $new_wp_config);
+
+  // Save the original one so we can restore it later
+  file_put_contents("/tmp/.wpserver-original-wp-config", $wp_config);
+}
+else if(WPS_LOCATION == 'wp-content') {
+  $new_wp_config = file_get_contents("{$options['wp-content']}/wpserver-wp-config.php") . <<<EOT
+define('DB_CHARSET', 'utf8');
+define('DB_COLLATE', '');
+define('AUTH_KEY',         'put your unique phrase here');
+define('SECURE_AUTH_KEY',  'put your unique phrase here');
+define('LOGGED_IN_KEY',    'put your unique phrase here');
+define('NONCE_KEY',        'put your unique phrase here');
+define('AUTH_SALT',        'put your unique phrase here');
+define('SECURE_AUTH_SALT', 'put your unique phrase here');
+define('LOGGED_IN_SALT',   'put your unique phrase here');
+define('NONCE_SALT',       'put your unique phrase here');
+\$table_prefix  = 'wp_';
+define('WPLANG', '');
+if ( !defined('ABSPATH') )
+  define('ABSPATH', dirname(__FILE__) . '/');
+EOT;
+
+  $new_wp_config .= $inject;
+
+  file_put_contents("{$options['wp-root']}/wp-config.php", $new_wp_config);
+
+  // Hook up the wp-content folder
+  system("ln -s '{$options['wp-content']}' '{$options['wp-root']}/wp-content'");
+}
 
 //
 // Mush up the arguments and start the server
@@ -232,7 +439,15 @@ echo Colours::fg('blue');
 echo "WP Standalone Server started at " . date('H:i:s \o\n d-m-Y') . "\n";
 echo Colours::fg('white');
 echo "Written and maintained by dxw. Visit http://wpserver.labs.dxw.com for more information.\n";
-echo "Found a WordPress installation at {$options['wp-root']}\n";
+
+if(WPS_LOCATION == 'root') {
+  echo "Found a WordPress installation at {$options['wp-root']}\n";
+}
+else {
+  echo "Found a WordPress content directory at {$options['wp-content']}\n";
+  echo "Using a WordPress core at: {$options['wp-root']}\n";
+}
+
 echo "Listening on {$options['i']}:{$options['p']}\n";
 echo "Press Ctrl-C to quit.\n";
 
@@ -265,6 +480,7 @@ while(true) {
     $number = $matches[2];
     switch($matches[2]) {
       case "PHP Parse": $number = E_PARSE;
+      case "PHP Fatal": $number = E_ERROR;
     }
 
     if(!isset($options['show-wp-errors']) && strpos($matches[4], 'wp-content') === false && strpos($matches[4], 'wp-config.php') === false) {

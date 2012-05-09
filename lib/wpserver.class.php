@@ -117,7 +117,7 @@ class WPServer {
    */
   static public function emit_php_error($number, $error, $file, $line, $options = array('show-errors' => E_ALL)) {
     $error_type = array (
-      E_ERROR          => 'Error',
+      E_ERROR          => 'Fatal error',
       E_WARNING        => 'Warning',
       E_PARSE          => 'Parsing error',
       E_NOTICE         => 'Notice',
@@ -135,7 +135,7 @@ class WPServer {
     );
 
     // If the error is unknown, pass it through directly
-    if(!$error_type[$number]) {
+    if(empty($error_type[$number])) {
       $error_type[$number] = $number;
     }
 
