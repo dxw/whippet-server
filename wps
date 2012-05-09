@@ -218,7 +218,7 @@ function signal_handler($signal) {
 //
 
 $fp = fopen($options['wp-root'] . "/wp-config.php", 'a');
-fputs($fp, "////WPSERVER START\nrequire('" . dirname(__FILE__) . "/lib/load_wpserver.php');\n////WPSERVER END\n");
+fputs($fp, "////WPSERVER START\n////You can ignore this section. It's used by wpserver to collect data and will be automatically removed when you exit wpserver.\nrequire('" . dirname(__FILE__) . "/lib/load_wpserver.php');\n////WPSERVER END\n");
 fclose($fp);
 
 
