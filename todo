@@ -14,6 +14,4 @@ Refactor wps, moving some stuff into other files where that's sensible (eg optio
 
 When callbacks are listed, multiple callbacks of the same priority get erroneously reordered. They should stay in the order they were added in.
 
-It would be good to cache the callback file:line grep calls into a temp file as they're quite slow.
-
 We should check that grep is available before attempting to run it
