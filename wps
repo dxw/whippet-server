@@ -20,6 +20,13 @@ if($version_bits[0] < 5 || $version_bits[1] < 4) {
 // MySQL or sqlite/PDO extensions
 
 
+// Libnotify
+$output = array();
+exec("which notify-send", $output);
+if(file_exists(trim($output[0]))) {
+  define("WPS_GOT_LIBNOTIFY", trim($output[0]));
+}
+
 // Timezone
 date_default_timezone_set('UTC');
 
@@ -148,6 +155,11 @@ else {
 }
 
 
+// Libnotify?
+if(defined('WPS_GOT_LIBNOTIFY')) {
+  $options['libnotify'] = WPS_GOT_LIBNOTIFY;
+}
+
 
 //
 // Trap Ctrl-C so that we can say things before we quit
@@ -259,7 +271,7 @@ while(true) {
       continue;
     }
     
-    WPServer::emit_php_error($number, $matches[3], $matches[4], $matches[5], $options['show-errors']);
+    WPServer::emit_php_error($number, $matches[3], $matches[4], $matches[5], $options);
     continue;
   }
 

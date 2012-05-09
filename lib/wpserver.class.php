@@ -115,7 +115,7 @@ class WPServer {
    * in handle_php_error because we want a static version to be used from
    * the bootstrap script.
    */
-  static public function emit_php_error($number, $error, $file, $line, $show = E_ALL) {
+  static public function emit_php_error($number, $error, $file, $line, $options = array('show-errors' => E_ALL)) {
     $error_type = array (
       E_ERROR          => 'Error',
       E_WARNING        => 'Warning',
@@ -134,15 +134,17 @@ class WPServer {
       E_USER_DEPRECATED     => 'Deprecated',
     );
 
+    // If the error is unknown, pass it through directly
     if(!$error_type[$number]) {
       $error_type[$number] = $number;
     }
 
     // Should we show this error?
-    if(($number & $show) != $number) {
+    if(($number & $options['show-errors']) != $number) {
       return;
     }
 
+    // Display the error
     WPServer::message(
       Colours::fg('bold_red') .
       $error_type[$number] . 
@@ -155,6 +157,14 @@ class WPServer {
       " at line {$line}" .
       Colours::fg("white")
     );
+
+    // Show a notification, if we've got libnotify
+    if(!empty($options['libnotify'])) {
+      $message = "{$error_type[$number]}: {$error} in {$file} at line {$line}";
+      $message = str_replace("'", "\\'", $message);
+
+      exec("{$options['libnotify']} -i error 'WPServer' '{$message}'");
+    }
   }
 
   /** 
@@ -171,7 +181,7 @@ class WPServer {
 
     $file = str_replace($this->options['wp-root'], '', $file);
 
-    $this->emit_php_error($number, $error, $file, $line, $this->options['show-errors']);
+    $this->emit_php_error($number, $error, $file, $line, $this->options);
 
     return true;
   }
