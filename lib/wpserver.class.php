@@ -492,17 +492,12 @@ class WPServer {
 
     if(count($wp_filter[$hook])) {
       $this->message("The following callback functions will execute:");
-
       
       $hooks = $wp_filter[$hook];
-
       ksort($hooks, SORT_NUMERIC);
 
       foreach($hooks as $priority => $callbacks) {
-
-
         foreach($callbacks as $callback) {
-
           if(is_array($callback['function'])) {
             $function = $callback['function'][1];
           }
@@ -512,32 +507,55 @@ class WPServer {
 
           $message =  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
 
-          $file = exec("grep -rn 'function {$function}' {$this->options['wp-root']}/*");
-
-          if(empty($file)) {
-            $file = exec("grep -rn 'function {$function}' {$this->options['wp-content']}/*");
+          if(file_exists("/tmp/.wpserver-callback-cache")) {
+            $callback_cache = unserialize(file_get_contents('/tmp/.wpserver-callback-cache'));
+          }
+          else {
+            $callback_cache = array();
           }
 
-          if(!empty($file)) {
-            // /home/harry/Code/wpserver/wordpresses/latest/wp-includes/functions.php:function wp_ob_end_flush_all() {
+          $callback_data = false;
 
+          if(!empty($callback_cache[$this->options['wp-version']][$function])) {
+            $callback_data = $callback_cache[$this->options['wp-version']][$function];
+          }
+          else {
+            $file = exec("grep -rn 'function {$function}' {$this->options['wp-root']}/*");
 
-            $file = str_replace($this->options['wp-root'], '', $file);
-            $file = str_replace($this->options['wp-content'], '', $file);
-
-            if(preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
-              $message .= Colours::fg("brown") . " in {$matches[1]} at line {$matches[2]}";
+            if(empty($file)) {
+              $file = exec("grep -rn 'function {$function}' {$this->options['wp-content']}/*");
             }
+
+            if(!empty($file)) {
+              $file = str_replace($this->options['wp-root'], '', $file);
+              $file = str_replace($this->options['wp-content'], '', $file);
+
+              if(preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
+                $callback_data = array();
+                $callback_data['file'] = $matches[1];
+                $callback_data['line'] = $matches[2];
+
+                if(empty($callback_cache[$this->options['wp-version']])) {
+                  $callback_cache[$this->options['wp-version']] = array();
+                }
+
+                $callback_cache[$this->options['wp-version']][$function] = $callback_data;
+
+                file_put_contents('/tmp/.wpserver-callback-cache', serialize($callback_cache));
+              }
+            }
+          }
+
+          if($callback_data) {
+            $message .= Colours::fg("brown") . " in {$callback_data['file']} at line {$callback_data['line']}";
           }
 
           $this->message($message);
         }
       }
-
-      $this->message(Colours::fg('white') . "\n");
     }
     else {
-      $this->message("No callback functions are defined\n");
+      $this->message("No callback functions are defined");
     }
   }
 
