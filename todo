@@ -6,8 +6,6 @@ Have a ~/.wpserver settings file
 
 Show plugins being loaded
 
-Show specified filters being executed
-
 Make the location for temporary files configurable (a define will probably do)
 
 Remove all the echo calls from wps and use WPServer::message instead
