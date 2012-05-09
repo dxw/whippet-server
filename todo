@@ -4,4 +4,5 @@ It would be very nice if wps could operate just with a wp-content folder. Assume
 
 It would be lovely if we didn't have to use MySQL, and could use sqlite instead for dev environments.
 
+Have a ~/.wpserver settings file
 
