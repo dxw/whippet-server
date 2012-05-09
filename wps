@@ -33,9 +33,10 @@ $defaults = array(
   'p' => '8000',
   "mime-file" => "/etc/mime.types",
   "wp-root" => ".",
+  "show-errors" => E_ALL,
 );
 
-$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params", "show-wp-errors"));
+$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params", "no-scripts", "show-wp-errors", "show-errors:"));
 
 $options = array_merge($defaults, $arguments);
 
@@ -76,6 +77,14 @@ Options:
 
   --wp-root <path>        Path to the WordPress installation that WPServer should 
                           launch. (Default: .)
+
+  --show-errors <errors>  A specification of PHP error types to be displayed. You can use any 
+                          specification that you might normally use for error_reporting, 
+                          for example:
+
+                            --show-errors "E_ALL & ~E_STRICT"
+
+                          (Default: E_ALL)
 
   --no-sql                Do not display information about queries 
   --no-templates          Do not display information about template paths
@@ -125,6 +134,18 @@ if(!file_exists($options['wp-root'] . '/wp-config.php')) {
   );
 }
 
+// Convert the show-errors field to something useful
+$show_errors = @eval("return {$options['show-errors']};");
+
+if($show_errors === false) {
+  die_with_error(
+    "Unable to evaluate error specification: {$options['show-errors']}",
+    "The specification must be valid PHP code that identifies a set of errors to be displayed.\nSee the manual for more information: http://php.net/manual/en/function.error-reporting.php"
+  );
+}
+else {
+  $options['show-errors'] = $show_errors;
+}
 
 
 
@@ -238,7 +259,7 @@ while(true) {
       continue;
     }
     
-    WPServer::emit_php_error($number, $matches[3], $matches[4], $matches[5]);
+    WPServer::emit_php_error($number, $matches[3], $matches[4], $matches[5], $options['show-errors']);
     continue;
   }
 

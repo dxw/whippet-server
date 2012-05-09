@@ -115,7 +115,7 @@ class WPServer {
    * in handle_php_error because we want a static version to be used from
    * the bootstrap script.
    */
-  static public function emit_php_error($number, $error, $file, $line) {
+  static public function emit_php_error($number, $error, $file, $line, $show = E_ALL) {
     $error_type = array (
       E_ERROR          => 'Error',
       E_WARNING        => 'Warning',
@@ -138,6 +138,10 @@ class WPServer {
       $error_type[$number] = $number;
     }
 
+    // Should we show this error?
+    if(($number & $show) != $number) {
+      return;
+    }
 
     WPServer::message(
       Colours::fg('bold_red') .
@@ -167,7 +171,7 @@ class WPServer {
 
     $file = str_replace($this->options['wp-root'], '', $file);
 
-    $this->emit_php_error($number, $error, $file, $line);
+    $this->emit_php_error($number, $error, $file, $line, $this->options['show-errors']);
 
     return true;
   }
