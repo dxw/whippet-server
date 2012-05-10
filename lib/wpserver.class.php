@@ -159,7 +159,7 @@ class WPServer {
     );
 
     // Show a notification, if we've got libnotify
-    if(!empty($options['libnotify'])) {
+    if(!empty($options['libnotify']) && $number === E_ERROR) {
       $message = "{$error_type[$number]}: {$error} in {$file} at line {$line}";
       $message = str_replace("'", "\\'", $message);
 
