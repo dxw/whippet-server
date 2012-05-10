@@ -292,6 +292,7 @@ if(WPS_LOCATION == 'wp-content' && !file_exists(dirname(__FILE__) . "/wordpresse
       passthru("wget -O '{$tempname}' http://wordpress.org/wordpress-{$options['wp-version']}.tar.gz");
     }
 
+    passthru("mkdir -p " . dirname(__FILE__) . "/wordpresses");
     passthru("tar -xvf '{$tempname}' -C " . dirname(__FILE__) . "/wordpresses");
     passthru("rm '{$tempname}'");
     passthru("mv '" . dirname(__FILE__) . "/wordpresses/wordpress'  '" . dirname(__FILE__) . "/wordpresses/{$options['wp-version']}'");
