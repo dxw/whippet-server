@@ -351,7 +351,7 @@ class WPServer {
       return $query;
     }
 
-    $this->message(Colours::highlight_sql("  " . $query));
+    $this->message(Colours::highlight_sql("  " . trim($query)));
 
     return $query;
   }
