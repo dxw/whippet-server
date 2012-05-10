@@ -5,8 +5,8 @@
  */
 
 // Can we avoid doing this somehow?
-//define('WP_SITEURL', 'http://localhost:8000');
-//define('WP_HOME', WP_SITEURL);
+define('WP_SITEURL', 'http://localhost:8000');
+define('WP_HOME', WP_SITEURL);
 
 // Note: The error handling stuff we do seems to override WP_DEBUG
 
