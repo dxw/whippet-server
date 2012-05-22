@@ -351,6 +351,39 @@ class WPServer {
       return $query;
     }
 
+    if(!isset($this->options['show-wp-queries'])) {
+      $in_wp_content = false;
+      $backtrace = debug_backtrace();
+
+      foreach($backtrace as $i => $func) {
+        if(empty($func['file'])) {
+          next;
+        }
+
+        if(preg_match('/wp-content/', $func['file'])) {
+          $in_wp_content = true;
+          $in_func = $func;
+          break;
+        }
+      }
+
+      if(!$in_wp_content) {
+        return $query;
+      }
+    }
+
+    if(isset($in_func)) {
+      $file = str_replace($this->options['wp-root'] . "/wp-content/", '', $in_func['file']);
+   
+      $this->message(
+        Colours::fg("purple") . "Query triggered: " . 
+        Colours::fg("white") ."By function " . 
+        Colours::fg("blue") . "{$in_func['function']}" . 
+        Colours::fg("white") . " in " . 
+        Colours::fg("brown") . $file . 
+        Colours::fg(white) . " at line {$in_func['line']}:");
+    }
+
     $this->message(Colours::highlight_sql("  " . trim($query)));
 
     return $query;
@@ -412,7 +445,7 @@ class WPServer {
       Colours::fg('yellow') . 
       "Template load: " . 
       Colours::fg('white') . 
-      "wanted {$want_template}, got {$got_template} (" . str_replace($this->options['wp-root'], '', $template) . ")"
+      "wanted {$want_template}, got {$got_template} (" . str_replace($this->options['wp-root'] . "/wp-content/", '', $template) . ")"
     );
 
     return $template;
@@ -446,6 +479,10 @@ class WPServer {
   public function wps_filter_all($hook, $params) {
     global $wp_filter;
 
+    //
+    // Check whether this hook should be displayed
+    //
+    
     $display = false;
 
     foreach($this->options['show-hooks'] as $show) {
@@ -458,6 +495,103 @@ class WPServer {
     if(!$display) {
       return;
     }
+
+    //
+    // If this hook has no callbacks, just bail
+    //
+
+    if(!count($wp_filter[$hook])) {
+      return;
+    }
+    
+    //
+    // Find the callbacks
+    //
+
+    $callback_message = '';
+    $all_wp_core = true;
+
+    $hooks = $wp_filter[$hook];
+    ksort($hooks, SORT_NUMERIC);
+
+    foreach($hooks as $priority => $callbacks) {
+      foreach($callbacks as $callback) {
+        if(is_array($callback['function'])) {
+          $function = $callback['function'][1];
+        }
+        else{
+          $function = $callback['function'];
+        }
+
+        // If the only callback is WPS, bail
+        if(count($hooks) == 1 && preg_match('/^wps_/', $function)) {
+          return;
+        }
+
+        $callback_message .=  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
+
+        if(file_exists("/tmp/.wpserver-callback-cache")) {
+          $callback_cache = unserialize(file_get_contents('/tmp/.wpserver-callback-cache'));
+        }
+        else {
+          $callback_cache = array();
+        }
+
+        $callback_data = false;
+
+        if(!empty($callback_cache[$this->options['wp-version']][$function])) {
+          $callback_data = $callback_cache[$this->options['wp-version']][$function];
+        }
+        else {
+          $file = exec("grep -rn 'function {$function}' {$this->options['wp-root']}/*");
+
+          if(empty($file) && isset($this->options['wp-content'])) {
+            $file = exec("grep -rn 'function {$function}' {$this->options['wp-content']}/*");
+          }
+
+          if(!empty($file)) {
+            $file = str_replace($this->options['wp-root'], '', $file);
+            $file = str_replace($this->options['wp-content'], '', $file);
+
+            if(preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
+              $callback_data = array();
+              $callback_data['file'] = $matches[1];
+              $callback_data['line'] = $matches[2];
+
+              if(empty($callback_cache[$this->options['wp-version']])) {
+                $callback_cache[$this->options['wp-version']] = array();
+              }
+
+              $callback_cache[$this->options['wp-version']][$function] = $callback_data;
+
+              file_put_contents('/tmp/.wpserver-callback-cache', serialize($callback_cache));
+            }
+          }
+        }
+
+        if($callback_data) {
+          // Is this a callback outside the WP core?
+          if(preg_match('/wp-content/', $callback_data['file'])) {
+            $all_wp_core = false;
+          }
+
+          $callback_message .= " in " . Colours::fg("brown") . str_replace($this->options['wp-root'] . "/wp-content/", '', $callback_data['file']) . Colours::fg("white") . " at line {$callback_data['line']}";
+        }
+      }
+    }
+
+    //
+    // If we're not showing WP core hooks, and all these callbacks are from the core, bail
+    //
+
+    if(!isset($this->options['show-wp-hooks']) && $all_wp_core) {
+      return;
+    }
+
+
+    //
+    // Find the caller
+    //
 
     $type = '';
     $caller = '';
@@ -477,86 +611,30 @@ class WPServer {
         break;
       }
     }
+    //
+    // Put together the message
+    //
 
-    $message = Colours::fg('cyan') . "Hook triggered: " . Colours::fg('white') . "{$type} " . Colours::fg('cyan') . "{$hook}" . Colours::fg('white') . " called from function " . Colours::fg('cyan') . "{$caller['function']}";
+    $message = 
+      Colours::fg('cyan') . "Hook triggered: " . 
+      Colours::fg('white') . "{$type} " . 
+      Colours::fg('cyan') . "{$hook}" . 
+      Colours::fg('white') . " called from function " . 
+      Colours::fg('cyan') . "{$caller['function']}";
 
     if(!empty($caller['file'])) {
-      $message .= Colours::fg('brown') . " in {$caller['file']}";
+      $message .= 
+        Colours::fg("white") . " in " . 
+        Colours::fg('brown') . str_replace($this->options['wp-root'], '', $caller['file']);
     }
 
     if(!empty($caller['line'])) {
-      $message .= " at line {$caller['line']}";
+      $message .= Colours::fg("white") . " at line {$caller['line']}";
     }
 
     $this->message("{$message}" . Colours::fg('white'));
-
-    if(count($wp_filter[$hook])) {
-      $this->message("The following callback functions will execute:");
-      
-      $hooks = $wp_filter[$hook];
-      ksort($hooks, SORT_NUMERIC);
-
-      foreach($hooks as $priority => $callbacks) {
-        foreach($callbacks as $callback) {
-          if(is_array($callback['function'])) {
-            $function = $callback['function'][1];
-          }
-          else{
-            $function = $callback['function'];
-          }
-
-          $message =  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
-
-          if(file_exists("/tmp/.wpserver-callback-cache")) {
-            $callback_cache = unserialize(file_get_contents('/tmp/.wpserver-callback-cache'));
-          }
-          else {
-            $callback_cache = array();
-          }
-
-          $callback_data = false;
-
-          if(!empty($callback_cache[$this->options['wp-version']][$function])) {
-            $callback_data = $callback_cache[$this->options['wp-version']][$function];
-          }
-          else {
-            $file = exec("grep -rn 'function {$function}' {$this->options['wp-root']}/*");
-
-            if(empty($file)) {
-              $file = exec("grep -rn 'function {$function}' {$this->options['wp-content']}/*");
-            }
-
-            if(!empty($file)) {
-              $file = str_replace($this->options['wp-root'], '', $file);
-              $file = str_replace($this->options['wp-content'], '', $file);
-
-              if(preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
-                $callback_data = array();
-                $callback_data['file'] = $matches[1];
-                $callback_data['line'] = $matches[2];
-
-                if(empty($callback_cache[$this->options['wp-version']])) {
-                  $callback_cache[$this->options['wp-version']] = array();
-                }
-
-                $callback_cache[$this->options['wp-version']][$function] = $callback_data;
-
-                file_put_contents('/tmp/.wpserver-callback-cache', serialize($callback_cache));
-              }
-            }
-          }
-
-          if($callback_data) {
-            $message .= Colours::fg("brown") . " in {$callback_data['file']} at line {$callback_data['line']}";
-          }
-
-          $this->message($message);
-        }
-      }
-    }
-    else {
-      $this->message("No callback functions are defined");
-    }
+    $this->message("The following callback functions will execute:");
+    $this->message($callback_message);
   }
 
   /** 
