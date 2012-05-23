@@ -21,9 +21,9 @@ For other operating systems, please consult Google, or, you can download from PH
 
 To get started, cd to the whippet directory, and do:
 
-    $ ./whippet
+    $ ./whippet path/to/a/WordPress
 
-You'll probably get an error, but all the errors should tell you what to do. For a full
+You may get an error, but all the errors should tell you what to do. For a full
 listing of Whippet's options and arguments, run:
 
     $ ./whippet --help
