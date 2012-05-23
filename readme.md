@@ -34,7 +34,8 @@ Contribute
 
 We'd welcome help to make Whippet better. If you want to fix a bug or add a feature, 
 please fork the project and Github, make changes, and submit a pull request. If it's 
-something big, you might want to talk to us first.
+something big, you might want to talk to us first. If you need inspiration, check the
+TODO page on the wiki.
 
 Authors
 -------
