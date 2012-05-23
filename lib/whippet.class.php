@@ -1,6 +1,6 @@
 <?php
 
-define('WPS_VERSION', '0.1 RC1');
+define('WPS_VERSION', '0.1 ALPHA');
 
 class Whippet {
 
