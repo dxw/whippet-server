@@ -363,39 +363,55 @@ class Whippet {
       return $query;
     }
 
-    if(!isset($this->options['show-wp-queries'])) {
-      $in_wp_content = false;
-      $backtrace = debug_backtrace();
+    $in_wp_content = false;
+    $backtrace = debug_backtrace();
 
-      foreach($backtrace as $i => $func) {
-        if(empty($func['file'])) {
-          next;
-        }
-
-        if(preg_match('/wp-content/', $func['file'])) {
-          $in_wp_content = true;
-          $in_func = $func;
-          break;
-        }
+    // Check for something in wp-content
+    foreach($backtrace as $i => $func) {
+      if(empty($func['file'])) {
+        next;
       }
 
-      if(!$in_wp_content) {
-        return $query;
+      $this->message("\t\t{$func['file']}");
+
+      // I am not sure that this is robust
+      // It assumes that the stack looks like this:
+      // - wp-db.php stuff
+      //  - wp-db.php stuff
+      //   - function that calls wpdb with a query
+      //    - function that calls the thing which does the query <-- user interested in this
+      if(preg_match('/wp-db/', $func['file']) && preg_match('/wp-db/', $backtrace[$i+1]['file'])) {
+        $in_func = $backtrace[$i+3];
+      }
+
+      if(preg_match('/wp-content/', $func['file'])) {
+        $in_wp_content = true;
+        $in_func = $func;
+        break;
       }
     }
+
+    if(!isset($this->options['show-wp-queries']) && !$in_wp_content) {
+      return $query;
+    }
+
+    $message = Colours::fg("purple") . "Query: ";
 
     if(isset($in_func)) {
       $file = str_replace($this->options['wp-root'] . "/wp-content/", '', $in_func['file']);
    
-      $this->message(
-        Colours::fg("purple") . "Query triggered: " . 
-        Colours::fg("white") ."By function " . 
+      $message .=
+        Colours::fg("white") ."Triggered by function " . 
         Colours::fg("blue") . "{$in_func['function']}" . 
         Colours::fg("white") . " called from " . 
         Colours::fg("brown") . $file . 
-        Colours::fg(white) . " at line {$in_func['line']}:");
+        Colours::fg(white) . " at line {$in_func['line']}:";
+    }
+    else {
+
     }
 
+    $this->message($message);
     $this->message(Colours::highlight_sql("  " . trim($query)));
 
     return $query;
