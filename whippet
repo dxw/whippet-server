@@ -439,21 +439,15 @@ echo "Press Ctrl-C to quit.\n";
 
 //
 // PHP -S outputs boilerplate crap that we don't want to see.
-// Start it in the background with the output piped to a file, and then read that file as it is written to.
+// Start it with popen so that we can read its stdout and decide what to do
 //
 // The file gets deleted when the user quits.
 //
 
-exec("echo '{$valid_arguments}' | php -S {$options['i']}:{$options['p']} " . dirname(__FILE__) . "/lib/router.php > " . sys_get_temp_dir() .  "/.whippet-output 2>&1 &");
+$handle = popen("echo '{$valid_arguments}' | php -S {$options['i']}:{$options['p']} " . dirname(__FILE__) . "/lib/router.php 2>&1", 'r');
 
-$fp = fopen(sys_get_temp_dir() . "/.whippet-output", 'r');
-while(true) {
-  $line = $c = '';
-
-  while($c != "\n") {
-    $c = fread($fp, 1);
-    $line .= $c;
-  }
+while(!feof($handle)) {
+  $line = fgets($handle);
 
   // 
   // Output filters
