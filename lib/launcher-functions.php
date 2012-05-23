@@ -117,6 +117,12 @@ Options:
 
                           should you need to obtain it. (Default: /etc/mime.types)
 
+  --wp-version <version>  When running Whippet on a wp-content directory, specifies the version
+                          of WordPress that should be loaded. (Default: latest)
+
+  --wordpresses <path>    Specify a path to the directory where Whippet should download and store 
+                          WordPress core files. (Default: ~/.wordpresses)
+
   --show-errors <errors>  A specification of PHP error types to be displayed. You can use any 
                           specification that you might normally use for error_reporting, 
                           for example:
@@ -124,9 +130,6 @@ Options:
                             --show-errors "E_ALL & ~E_STRICT"
 
                           (Default: E_ALL)
-
-  --wp-version <version>  When running Whippet on a wp-content directory, specifies the version
-                          of WordPress that should be loaded. (Default: latest)
 
   --show-hooks <hooks>    When set, Whippet will watch for calls to the specified hooks and display
                           them on the console. For example:
@@ -137,8 +140,14 @@ Options:
 
                             --show-hooks 'wp_.*'
 
+                          To show all hooks:
+                            
+                            --show-hooks '.*'
+
                           You probably shouldn't try to put a comma in a regex. Hooks with no callbacks
-                          defined and hooks defined by Whippet will not be displayed. (Default: none)
+                          defined and hooks defined by Whippet will not be displayed. Hooks defined by
+                          the WordPress core will not be displayed unless you also specify --show-wp-hooks.
+                          (Default: none)
 
   --no-sql                Do not display information about queries 
   --no-templates          Do not display information about template paths
@@ -156,9 +165,6 @@ Options:
 
   --show-wp-hooks         Show calls to hooks that are set by the WordPress core. (Default: only show
                           calls that are set by files in wp-content)
-
-  --wordpresses <path>    Specify a path to the directory where Whippet should download and store 
-                          WordPress core files. (Default: ~/.wordpresses)
 
 Setting Defaults:
 
