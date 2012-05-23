@@ -4,6 +4,14 @@ Depends on PHP 5.4. Under Ubuntu, do:
   $ sudo apt-get update
   $ sudo apt-get install php5
 
+Under OS X, there are some solutions here:
+
+  http://stackoverflow.com/questions/9534451/how-do-i-install-php-5-4-on-mac-os-x-lion
+
+Or, you can download it from PHP.net:
+
+  http://php.net/downloads.php
+
 To get started, cd to the directory containing the wps file, and run it:
 
   $ ./wps
