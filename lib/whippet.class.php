@@ -28,6 +28,9 @@ class Whippet {
   */
   public $start_time;
 
+  public function __construct() {
+    date_default_timezone_set('UTC');
+  }
 
   /**
    * Parse options that are passed to us from stdin.Not sure what the format 
@@ -49,8 +52,8 @@ class Whippet {
     // file (on subsequent requests)
     //
 
-    if(file_exists("/tmp/.whippet-arguments")) {
-      $options = file_get_contents("/tmp/.whippet-arguments");
+    if(file_exists(sys_get_temp_dir() . "/.whippet-arguments")) {
+      $options = file_get_contents(sys_get_temp_dir() . "/.whippet-arguments");
     }
     else {
       $read = array(fopen('php://stdin', 'r'));
@@ -64,7 +67,21 @@ class Whippet {
         fclose($read[0]);
       }
 
-      file_put_contents("/tmp/.whippet-arguments", $options);
+      if(file_put_contents(sys_get_temp_dir() . "/.whippet-arguments", $options) === false) {
+        $this->message(
+          Colours::fg('bold_red') .
+          "Error: " . 
+          Colours::fg('white') .
+          "Unable to write options file. This is a serious error. You should probably give up and report a bug.");
+      }
+    }
+    
+    if(!$options) {
+      $this->message(
+        Colours::fg('bold_red') .
+        "Error: " . 
+        Colours::fg('white') .
+        "Unable to locate options on stdin or on the disk. This is a serious error. You should probably give up and report a bug.");
     }
 
     // There's no need to validate here because the bootstrap script has done that.
@@ -198,8 +215,6 @@ class Whippet {
 
     $this->options = $this->get_options();
 
-    date_default_timezone_set('UTC');
-
     $this->request_uri = parse_url($_SERVER['REQUEST_URI']);
     $this->request_path = $this->options['wp-root'] . $this->request_uri['path'];
 
@@ -254,7 +269,8 @@ class Whippet {
    * Note: this function will not serve content-type or content-length headers.
    */
   public function serve_headers() {
-    // TODO: I made these up. I'm not sure they're standards compliant.
+    // TODO: I made these up. I'm not sure they're standards compliant. I'm not 
+    // sure if they set stuff that WP already sets. I'm not sure if I missed things.
 
     header("Date: " . gmdate('D, d-M-Y H:i:s \U\T\C'));
     header("Expires: " . gmdate('D, d-M-Y H:i:s \U\T\C'));
@@ -270,8 +286,8 @@ class Whippet {
     // Work out what the content type is
     //
 
-    // I don't think we need to send this, because WordPress will set it.
-    //$content_type = "text/html; charset=UTF-8";
+    // Default to the official WTF mime type
+    $content_type = "application/octet-stream";
 
     $extension = substr(strrchr($this->request_path, '.'), 1);
 
@@ -321,7 +337,7 @@ class Whippet {
     $this->serve_headers();
 
     // Return some code to be executed by the router at global scope
-    return 'require "' . $this->request_path . '"; ?> ';
+    return 'require "' . $this->request_path . '";';
   }
 
   
@@ -335,7 +351,7 @@ class Whippet {
     $this->serve_headers();
 
     // Return some code to be executed by the router at global scope
-    return 'require "' . $this->options['wp-root'] . '/index.php"; ?> ';
+    return 'require "' . $this->options['wp-root'] . '/index.php";';
   }
 
   
@@ -531,8 +547,8 @@ class Whippet {
 
         $callback_message .=  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
 
-        if(file_exists("/tmp/.whippet-callback-cache")) {
-          $callback_cache = unserialize(file_get_contents('/tmp/.whippet-callback-cache'));
+        if(file_exists(sys_get_temp_dir() . "/.whippet-callback-cache")) {
+          $callback_cache = unserialize(file_get_contents(sys_get_temp_dir() . "/.whippet-callback-cache"));
         }
         else {
           $callback_cache = array();
@@ -565,7 +581,7 @@ class Whippet {
 
               $callback_cache[$this->options['wp-version']][$function] = $callback_data;
 
-              file_put_contents('/tmp/.whippet-callback-cache', serialize($callback_cache));
+              file_put_contents(sys_get_temp_dir() . "/.whippet-callback-cache", serialize($callback_cache));
             }
           }
         }
