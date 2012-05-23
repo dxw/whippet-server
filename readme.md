@@ -43,5 +43,5 @@ something big, you might want to talk to us first.
 Authors
 -------
 
-Harry Metcalfe (harry@dxw.com)
-Tom Adams (tom@dxw.com)
+ - Harry Metcalfe (harry@dxw.com)
+ - Tom Adams (tom@dxw.com)
