@@ -9,6 +9,10 @@ information to the terminal without cluttering up or breaking your templates.
 Installation
 ------------
 
+Clone the repository and run:
+
+    $ git submodule update --init
+
 Depends on PHP 5.4. Under Ubuntu, do:
 
     $ sudo add-apt-repository ppa:ondrej/php5
