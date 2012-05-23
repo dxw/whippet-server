@@ -372,8 +372,6 @@ class Whippet {
         next;
       }
 
-      $this->message("\t\t{$func['file']}");
-
       // I am not sure that this is robust
       // It assumes that the stack looks like this:
       // - wp-db.php stuff
