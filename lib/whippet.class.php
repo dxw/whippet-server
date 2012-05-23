@@ -4,10 +4,6 @@ define('WPS_VERSION', '0.1 ALPHA');
 
 class Whippet {
 
-  /* What version are we?
-   */
-  public $version = "0.1";
-
   /* Stores options passed to the routing script
    */
   public $options; 
@@ -275,7 +271,7 @@ class Whippet {
     header("Date: " . gmdate('D, d-M-Y H:i:s \U\T\C'));
     header("Expires: " . gmdate('D, d-M-Y H:i:s \U\T\C'));
     header("Cache-Control: no-cache");
-    header("Server: WordPress Server {$this->version}");
+    header("Server: Whippet " . WPS_VERSION);
   }
 
   /**
@@ -354,7 +350,6 @@ class Whippet {
     return 'require "' . $this->options['wp-root'] . '/index.php";';
   }
 
-  
 
   //
   // FILTERS
