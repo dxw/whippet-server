@@ -391,7 +391,7 @@ class Whippet {
         Colours::fg("purple") . "Query triggered: " . 
         Colours::fg("white") ."By function " . 
         Colours::fg("blue") . "{$in_func['function']}" . 
-        Colours::fg("white") . " in " . 
+        Colours::fg("white") . " called from " . 
         Colours::fg("brown") . $file . 
         Colours::fg(white) . " at line {$in_func['line']}:");
     }
@@ -520,7 +520,7 @@ class Whippet {
     // Find the callbacks
     //
 
-    $callback_message = '';
+    $callback_messages = array();
     $all_wp_core = true;
 
     $hooks = $wp_filter[$hook];
@@ -540,7 +540,7 @@ class Whippet {
           return;
         }
 
-        $callback_message .=  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
+        $callback_message =  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
 
         if(file_exists(sys_get_temp_dir() . "/.whippet-callback-cache")) {
           $callback_cache = unserialize(file_get_contents(sys_get_temp_dir() . "/.whippet-callback-cache"));
@@ -589,6 +589,8 @@ class Whippet {
 
           $callback_message .= " in " . Colours::fg("brown") . str_replace($this->options['wp-root'] . "/wp-content/", '', $callback_data['file']) . Colours::fg("white") . " at line {$callback_data['line']}";
         }
+
+        $callback_messages[] = $callback_message;
       }
     }
 
@@ -646,7 +648,9 @@ class Whippet {
 
     $this->message("{$message}" . Colours::fg('white'));
     $this->message("The following callback functions will execute:");
-    $this->message($callback_message);
+    foreach($callback_messages as $callback_message) {
+      $this->message($callback_message);
+    }
   }
 
   /** 

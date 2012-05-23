@@ -3,6 +3,7 @@
 
 require dirname(__FILE__) . '/lib/colours.class.php';
 require dirname(__FILE__) . '/lib/whippet.class.php';
+require dirname(__FILE__) . '/lib/optionparser/lib/OptionParser.php';
 
 
 //
@@ -61,22 +62,36 @@ if(!empty($_SERVER['HOME']) && file_exists($_SERVER['HOME'] . "/.whippetrc")) {
   $defaults = array_merge($defaults, parse_ini_file($_SERVER['HOME'] . "/.whippetrc"));
 }
 
-$arguments = getopt("hi:p:", array(
-  "help", 
-  "mime-file:", 
-  "no-sql", 
-  "no-templates", 
-  "no-assets", 
-  "no-params", 
-  "no-scripts", 
-  "show-wp-errors", 
-  "show-errors:", 
-  "wp-version:", 
-  "show-hooks:", 
-  "show-wp-queries", 
-  "show-wp-hooks", 
-  "wordpresses:", 
-));
+$optparser = new OptionParser;
+
+$optparser->addRule('h|help', "Help text");
+$optparser->addRule('i::', "Specify an interface to listen on. (Default: localhost)");
+$optparser->addRule('p::');
+$optparser->addRule('mime-file::');
+$optparser->addRule('no-sql');
+$optparser->addRule('no-templates');
+$optparser->addRule('no-assets');
+$optparser->addRule('no-params');
+$optparser->addRule('no-scripts');
+$optparser->addRule('show-wp-errors');
+$optparser->addRule('show-wp-queries');
+$optparser->addRule('show-wp-hooks');
+$optparser->addRule('show-errors::');
+$optparser->addRule('wp-version::');
+$optparser->addRule('show-hooks::');
+$optparser->addRule('wordpresses::');
+
+try{
+  $argv = $optparser->parse();
+}
+catch(Exception $e) {
+  echo Colours::fg('red') . "Error: " . Colours::fg("white") . $e->getMessage() . "\n\n";
+  usage();
+
+  exit(0);
+}
+
+$arguments = $optparser->getAllOptions();
 
 $options = array_merge($defaults, $arguments);
 
@@ -104,10 +119,8 @@ function realpathex($path) {
   return realpath($path);
 }
 
-// TODO: Check if they specified any options that we don't recognise
-
-// Emit help, if required, and then exit
-if(isset($options['h']) || isset($options['help'])) {
+function usage() {
+  global $optparser;
 ?>
 Whippet launches a stand-alone web server for a specific WordPress installation.
 It makes WordPress easier to develop with, for example, by adding lots of debug 
@@ -122,6 +135,7 @@ Arguments:
                           Whippet should launch. (Default: .)
 
 Options:
+
   -i <interface address>  Specify an interface to listen on. (Default: localhost)
   -p <port>               Specify a port number to listen on. (Default: 8000)
 
@@ -197,9 +211,17 @@ Feedback and help:
   exit(0);
 }
 
+
+// TODO: Check if they specified any options that we don't recognise
+
+// Emit help, if required, and then exit
+if(isset($options['h']) || isset($options['help'])) {
+  usage();
+}
+
 // Capture the path to WordPress, if given
-if(!empty($argv[1])) {
-  $options['wp-root'] = $argv[1];
+if(!empty($argv[0])) {
+  $options['wp-root'] = $argv[0];
 }
 
 // Is there a mime.types file?
