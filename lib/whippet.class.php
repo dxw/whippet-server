@@ -1,7 +1,8 @@
 <?php
 
+define('WPS_VERSION', '0.1 RC1');
 
-class WPServer {
+class Whippet {
 
   /* What version are we?
    */
@@ -48,8 +49,8 @@ class WPServer {
     // file (on subsequent requests)
     //
 
-    if(file_exists("/tmp/.wpserver-arguments")) {
-      $options = file_get_contents("/tmp/.wpserver-arguments");
+    if(file_exists("/tmp/.whippet-arguments")) {
+      $options = file_get_contents("/tmp/.whippet-arguments");
     }
     else {
       $read = array(fopen('php://stdin', 'r'));
@@ -63,7 +64,7 @@ class WPServer {
         fclose($read[0]);
       }
 
-      file_put_contents("/tmp/.wpserver-arguments", $options);
+      file_put_contents("/tmp/.whippet-arguments", $options);
     }
 
     // There's no need to validate here because the bootstrap script has done that.
@@ -145,7 +146,7 @@ class WPServer {
     }
 
     // Display the error
-    WPServer::message(
+    Whippet::message(
       Colours::fg('bold_red') .
       $error_type[$number] . 
       Colours::fg('red') .
@@ -163,7 +164,7 @@ class WPServer {
       $message = "{$error_type[$number]}: {$error} in {$file} at line {$line}";
       $message = str_replace("'", "\\'", $message);
 
-      exec("{$options['libnotify']} -i error 'WPServer' '{$message}'");
+      exec("{$options['libnotify']} -i error 'Whippet' '{$message}'");
     }
   }
 
@@ -530,8 +531,8 @@ class WPServer {
 
         $callback_message .=  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
 
-        if(file_exists("/tmp/.wpserver-callback-cache")) {
-          $callback_cache = unserialize(file_get_contents('/tmp/.wpserver-callback-cache'));
+        if(file_exists("/tmp/.whippet-callback-cache")) {
+          $callback_cache = unserialize(file_get_contents('/tmp/.whippet-callback-cache'));
         }
         else {
           $callback_cache = array();
@@ -564,7 +565,7 @@ class WPServer {
 
               $callback_cache[$this->options['wp-version']][$function] = $callback_data;
 
-              file_put_contents('/tmp/.wpserver-callback-cache', serialize($callback_cache));
+              file_put_contents('/tmp/.whippet-callback-cache', serialize($callback_cache));
             }
           }
         }

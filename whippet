@@ -2,7 +2,7 @@
 <?php
 
 require dirname(__FILE__) . '/lib/colours.class.php';
-require dirname(__FILE__) . '/lib/wpserver.class.php';
+require dirname(__FILE__) . '/lib/whippet.class.php';
 
 
 //
@@ -14,7 +14,7 @@ require dirname(__FILE__) . '/lib/wpserver.class.php';
 $version_bits = explode('.', phpversion());
 
 if($version_bits[0] < 5 || $version_bits[1] < 4) {
-  die_with_error("wpserver requires PHP 5.4 or greater");
+  die_with_error("whippet requires PHP 5.4 or greater");
 }
 
 // MySQL or sqlite/PDO extensions
@@ -45,7 +45,7 @@ $defaults = array(
   "show-hooks" =>'',
 );
 
-$arguments = getopt("hi:p:", array("help", "mime-file:", "wp-root:", "no-sql", "no-templates", "no-assets", "no-params", "no-scripts", "show-wp-errors", "show-errors:", "wp-version:", "show-hooks:", "show-wp-queries", "show-wp-hooks"));
+$arguments = getopt("hi:p:", array("help", "mime-file:", "no-sql", "no-templates", "no-assets", "no-params", "no-scripts", "show-wp-errors", "show-errors:", "wp-version:", "show-hooks:", "show-wp-queries", "show-wp-hooks"));
 
 $options = array_merge($defaults, $arguments);
 
@@ -66,12 +66,12 @@ function die_with_error($error, $help = '') {
 // Emit help, if required, and then exit
 if(isset($options['h']) || isset($options['help'])) {
 ?>
-WPServer launches a stand-alone web server for a specific WordPress installation.
+Whippet launches a stand-alone web server for a specific WordPress installation.
 It makes WordPress easier to develop with, for example, by adding lots of debug 
 information to the terminal without cluttering up or breaking your templates.
 
 Usage: 
-  wps [options]
+  whippet [options]
 
 Options:
   -i <interface address>  Specify an interface to listen on. (Default: localhost)
@@ -85,7 +85,7 @@ Options:
                           should you need to obtain it. (Default: /etc/mime.types)
 
   --wp-root <path>        Path to the WordPress installation or wp-content directory that 
-                          WPServer should launch. (Default: .)
+                          Whippet should launch. (Default: .)
 
   --show-errors <errors>  A specification of PHP error types to be displayed. You can use any 
                           specification that you might normally use for error_reporting, 
@@ -95,7 +95,7 @@ Options:
 
                           (Default: E_ALL)
 
-  --wp-version <version>  When running WPServer on a wp-content directory, specifies the version
+  --wp-version <version>  When running Whippet on a wp-content directory, specifies the version
                           of WordPress that should be loaded. The core files for this version must
                           be present at:
 
@@ -103,7 +103,7 @@ Options:
 
                           (Default: latest)
 
-  --show-hooks <hooks>    When set, WPServer will watch for calls to the specified hooks and display
+  --show-hooks <hooks>    When set, Whippet will watch for calls to the specified hooks and display
                           them on the console. For example:
 
                             --show-hooks init,admin_menu
@@ -113,7 +113,7 @@ Options:
                             --show-hooks 'wp_.*'
 
                           You probably shouldn't try to put a comma in a regex. Hooks with no callbacks
-                          defined and hooks defined by WPServer will not be displayed. (Default: none)
+                          defined and hooks defined by Whippet will not be displayed. (Default: none)
 
   --no-sql                Do not display information about queries 
   --no-templates          Do not display information about template paths
@@ -136,11 +136,16 @@ Options:
   exit(0);
 }
 
+// Capture the path to WordPress, if given
+if(!empty($argv[1])) {
+  $options['wp-root'] = $argv[1];
+}
+
 // Is there a mime.types file?
 if(!file_exists($options['mime-file'])) {
   die_with_error(
     "Unable to find file {$options['mime-file']}", 
-    "You can obtain the most recent mime file here:\n\n  http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types\n\nInstruct WPServer to use this file using the --mime-file argument.");
+    "You can obtain the most recent mime file here:\n\n  http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types\n\nInstruct Whippet to use this file using the --mime-file argument.");
 }
 
 // Is the specified port sane?
@@ -183,11 +188,11 @@ elseif(file_exists($options['wp-root'] . '/themes') && file_exists($options['wp-
   // Remember where we are
   define("WPS_LOCATION", "wp-content");
 
-  $skeleton_wpserver_wpconfig = <<<EOT
+  $skeleton_whippet_wpconfig = <<<EOT
 <?php 
 
 /**
- * This file is used by wpserver when you run this wp-content folder without
+ * This file is used by Whippet when you run this wp-content folder without
  * putting it into a WordPress installation. You can put anything here that
  * you would normally put into wp-config.php.
  *
@@ -195,7 +200,7 @@ elseif(file_exists($options['wp-root'] . '/themes') && file_exists($options['wp-
  * that you're trying to run. There's no need to add the rest of the default
  * values, but you can if you like, or if you need to change them.
  *
- * Note: WP_DEBUG has no effect when running sites using wpserver.
+ * Note: WP_DEBUG has no effect when running sites using Whippet.
  */
 
 /** The name of the database for WordPress */
@@ -212,11 +217,11 @@ define('DB_HOST', 'localhost');
 EOT;
 
   // Make sure there's a config we can use
-  if(!file_exists($options['wp-root'] . "/wpserver-wp-config.php")) {
+  if(!file_exists($options['wp-root'] . "/whippet-wp-config.php")) {
     echo 
       Colours::fg('red') . "Error: " . Colours::fg('white') . 
-      "Couldn't find a configuration file at " . $options['wp-root'] . "/wpserver-wp-config.php\n" . 
-      "WPServer needs this file in order to know where your database is. You can specify anything\n" .
+      "Couldn't find a configuration file at " . $options['wp-root'] . "/whippet-wp-config.php\n" . 
+      "Whippet needs this file in order to know where your database is. You can specify anything\n" .
       "there that you would normally put in wp-config.php. At a minimum, it must contain your\n" .
       "database configuration. Once it's created, you might want to add it to your source\n" .
       "control software's ignores file. Would you like to create this file now?\n\nCreate and edit file? [Y/n] "
@@ -229,16 +234,16 @@ EOT;
     fclose($fp);
 
     if(strtolower($choice) != 'n') {
-      file_put_contents("{$options['wp-root']}/wpserver-wp-config.php", $skeleton_wpserver_wpconfig);
+      file_put_contents("{$options['wp-root']}/whippet-wp-config.php", $skeleton_whippet_wpconfig);
 
       if(getenv("VISUAL")) {
-        system("\$VISUAL {$options['wp-root']}/wpserver-wp-config.php > `tty`");
+        system("\$VISUAL {$options['wp-root']}/whippet-wp-config.php > `tty`");
       }
       else {
         echo 
-          "Created settings file at {$options['wp-root']}/wpserver-wp-config.php, but could\n" .
+          "Created settings file at {$options['wp-root']}/whippet-wp-config.php, but could\n" .
           "not load your editor because \$VISUAL is not set. Please add your database configuration\n" .
-          "to this file and restart WPServer\n";
+          "to this file and restart Whippet\n";
 
         exit(1);
       }
@@ -274,7 +279,7 @@ if(WPS_LOCATION == 'wp-content' && !file_exists(dirname(__FILE__) . "/wordpresse
     Colours::fg('red') . "Error: " . Colours::fg('white') . 
     "Unable to find the specified WordPress core in your wordpresses directory (" . dirname(__FILE__) . "/wordpresses)\n",
     "To run a site from its wp-content folder without it being in a WordPress installation, you need to set up your\n" .
-    "core WordPress files in the directory above. WPServer can set this up for you automatically.\n\n";
+    "core WordPress files in the directory above. Whippet can set this up for you automatically.\n\n";
 
   if($options['wp-version'] == 'latest') {
     echo "Attempt to download the latest version of WordPress now? [Y/n] ";
@@ -290,7 +295,7 @@ if(WPS_LOCATION == 'wp-content' && !file_exists(dirname(__FILE__) . "/wordpresse
   fclose($fp);
 
   if(strtolower($choice) != 'n') {
-    $tempname = tempnam("/tmp/", ".wpserver-") . "-download-wordpress-{$options['wp-version']}";
+    $tempname = tempnam("/tmp/", ".whippet-") . "-download-wordpress-{$options['wp-version']}";
 
     if($options['wp-version'] == 'latest') {
       passthru("wget -O '{$tempname}' http://wordpress.org/latest.tar.gz");
@@ -348,29 +353,29 @@ function signal_handler($signal) {
   global $options;
 
   // Delete the settings file
-  if(file_exists('/tmp/.wpserver-arguments')) {
-    unlink('/tmp/.wpserver-arguments');
+  if(file_exists('/tmp/.whippet-arguments')) {
+    unlink('/tmp/.whippet-arguments');
   }
  
   // Delete the output buffer
-  if(file_exists('/tmp/.wpserver_output')) {
-    unlink('/tmp/.wpserver_output');
+  if(file_exists('/tmp/.whippet_output')) {
+    unlink('/tmp/.whippet_output');
   }
 
   // Restore original wp-config
   if(WPS_LOCATION == 'root') {
-    if(file_exists('/tmp/.wpserver-original-wp-config')) {
-      file_put_contents($options['wp-root'] . "/wp-config.php", file_get_contents("/tmp/.wpserver-original-wp-config"));
+    if(file_exists('/tmp/.whippet-original-wp-config')) {
+      file_put_contents($options['wp-root'] . "/wp-config.php", file_get_contents("/tmp/.whippet-original-wp-config"));
 
-      unlink("/tmp/.wpserver-original-wp-config");
+      unlink("/tmp/.whippet-original-wp-config");
     }
     else {
       if(WPS_LOCATION == 'root') {
-        WPServer::message(
+        Whippet::message(
           Colours::fg('red') . "Error: " . Colours::fg('white') . "Unable to find wp-config backup file; could not restore original configuration",
-          "Your wp-config file should have been backed up at /tmp/.wpserver-original-wp-config, but\n" .
+          "Your wp-config file should have been backed up at /tmp/.whippet-original-wp-config, but\n" .
           "it is missing or unreadable. You should edit your wp-config.php by hand to remove the\n" .
-          "WPSERVER sections.\n");
+          "whippet sections.\n");
       }
     }
   }
@@ -402,16 +407,16 @@ if(WPS_LOCATION == 'wp-content') {
 }
 
 $inject  = <<<EOT
-////WPSERVER START
-////You can ignore these sections. They're used by wpserver to collect data and will be automatically removed when you exit wpserver.
+////Whippet START
+////You can ignore these sections. They're used by whippet to collect data and will be automatically removed when you exit whippet.
 {$wp_content_fix}
-////WPSERVER END
+////Whippet END
 
 require_once(ABSPATH . 'wp-settings.php');
 
-////WPSERVER START
-require('{$dir}/lib/load_wpserver.php');
-////WPSERVER END
+////Whippet START
+require('{$dir}/lib/load_whippet.php');
+////Whippet END
 EOT;
 
 // Get the config
@@ -425,10 +430,10 @@ if(WPS_LOCATION == 'root') {
   file_put_contents($options['wp-root'] . "/wp-config.php", $new_wp_config);
 
   // Save the original one so we can restore it later
-  file_put_contents("/tmp/.wpserver-original-wp-config", $wp_config);
+  file_put_contents("/tmp/.whippet-original-wp-config", $wp_config);
 }
 else if(WPS_LOCATION == 'wp-content') {
-  $new_wp_config = file_get_contents("{$options['wp-content']}/wpserver-wp-config.php");
+  $new_wp_config = file_get_contents("{$options['wp-content']}/whippet-wp-config.php");
 
   if(strpos('DB_CHARSET', $new_wp_config) === false) {
     $new_wp_config .= "define('DB_CHARSET', 'utf8');\n";
@@ -497,9 +502,9 @@ else if(WPS_LOCATION == 'wp-content') {
 $valid_arguments = serialize($options);
 
 echo Colours::fg('blue');
-echo "WP Standalone Server started at " . date('H:i:s \o\n d-m-Y') . "\n";
+echo "Whippet version " . WPS_VERSION  . " started at " . date('H:i:s \o\n d-m-Y') . "\n";
 echo Colours::fg('white');
-echo "Written and maintained by dxw. Visit http://wpserver.labs.dxw.com for more information.\n";
+echo "Written and maintained by dxw. Visit http://whippet.labs.dxw.com for more information.\n";
 
 if(WPS_LOCATION == 'root') {
   echo "Found a WordPress installation at {$options['wp-root']}\n";
@@ -519,9 +524,9 @@ echo "Press Ctrl-C to quit.\n";
 // The file gets deleted when the user quits.
 //
 
-exec("echo '{$valid_arguments}' | php -S {$options['i']}:{$options['p']} " . dirname(__FILE__) . "/lib/router.php > /tmp/.wpserver_output 2>&1 &");
+exec("echo '{$valid_arguments}' | php -S {$options['i']}:{$options['p']} " . dirname(__FILE__) . "/lib/router.php > /tmp/.whippet_output 2>&1 &");
 
-$fp = fopen("/tmp/.wpserver_output", 'r');
+$fp = fopen("/tmp/.whippet_output", 'r');
 while(true) {
   $line = $c = '';
 
@@ -548,13 +553,13 @@ while(true) {
       continue;
     }
     
-    WPServer::emit_php_error($number, $matches[3], $matches[4], $matches[5], $options);
+    Whippet::emit_php_error($number, $matches[3], $matches[4], $matches[5], $options);
     continue;
   }
 
   // Other stuff that comes out of PHP -S (only seen invalid request warnings so far)
   if(preg_match('/\[\w\w\w \w\w\w [\d\s:]+\] (.+)$/', $line, $matches)) {
-    WPServer::message(Colours::fg('blue') . "Server: " . Colours::fg('white') . $matches[1]);
+    Whippet::message(Colours::fg('blue') . "Server: " . Colours::fg('white') . $matches[1]);
     continue;
   }
 
