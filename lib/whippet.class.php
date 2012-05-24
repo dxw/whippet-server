@@ -35,7 +35,7 @@ class Whippet {
 
     $this->options = $this->get_options();
 
-    $this->cb_cache = new CallbackCache();
+    $this->cb_cache = new CallbackCache($this->options);
 
     if(!$this->cb_cache->load($this->options['cb-cache'])) {
       $this->message(Colours::fg('brown') . "Warning: " . Colours::fg('white') . "Unable to load or create callback cache file {$this->options['cb-cache']}. Displaying hook data will be slow.");
@@ -381,7 +381,7 @@ class Whippet {
     // Check for something in wp-content
     foreach($backtrace as $i => $func) {
       if(empty($func['file'])) {
-        next;
+        continue;
       }
 
       // I am not sure that this is robust
@@ -415,7 +415,7 @@ class Whippet {
         Colours::fg("blue") . "{$in_func['function']}" . 
         Colours::fg("white") . " called from " . 
         Colours::fg("brown") . $file . 
-        Colours::fg(white) . " at line {$in_func['line']}:";
+        Colours::fg("white") . " at line {$in_func['line']}:";
     }
     else {
 
@@ -501,20 +501,22 @@ class Whippet {
     $query_time = 0;
     $num_queries = 0;
 
-    foreach($wpdb->queries as $query) {
-      $query_time += $query[1];
-      $num_queries++;
+    if(is_array($wpdb->queries)) {
+      foreach($wpdb->queries as $query) {
+        $query_time += $query[1];
+        $num_queries++;
+      }
+
+      $query_time = round($query_time, 3);
     }
 
-    $query_time = round($query_time, 3);
-
-    $this->message("Completed request in {$wordpress_time}s ({$num_queries} queries took {$query_time}s)");
+    $this->message("Completed request in {$wordpress_time}s" . ($num_queries == 0? '.' : " ({$num_queries} queries took {$query_time}s)"));
   }
 
   /**
    * Emits the details of hooks and filters as they are called, if required
    */
-  public function wps_filter_all($hook, $params) {
+  public function wps_filter_all($hook) {
     global $wp_filter;
 
     //
@@ -538,7 +540,7 @@ class Whippet {
     // If this hook has no callbacks, just bail
     //
 
-    if(!count($wp_filter[$hook])) {
+    if(empty($wp_filter[$hook]) || !count($wp_filter[$hook])) {
       return;
     }
     
@@ -563,9 +565,9 @@ class Whippet {
           $function = $callback['function'];
         }
 
-        // If the only callback is WPS, bail
-        if(count($hooks) == 1 && preg_match('/^wps_/', $function)) {
-          return;
+        // Skip Whippet callbacks
+        if(preg_match('/^wps_/', $function)) {
+          continue;
         }
 
         $callback_message =  "\t{$priority}: " . Colours::fg('cyan') . $function .  Colours::fg('white');
@@ -592,6 +594,13 @@ class Whippet {
             $all_wp_core = false;
           }
 
+          // Make paths relative
+          $callback_data['file'] = str_replace($this->options['wp-root'], '', $callback_data['file']);
+
+          if(!empty($this->options['wp-content'])) {
+            $callback_data['file'] = str_replace($this->options['wp-content'], '', $callback_data['file']);
+          }
+
           $callback_message .= " in " . Colours::fg("brown") . str_replace($this->options['wp-root'] . "/wp-content/", '', $callback_data['file']) . Colours::fg("white") . " at line {$callback_data['line']}";
         }
         else {
@@ -604,9 +613,14 @@ class Whippet {
 
     //
     // If we're not showing WP core hooks, and all these callbacks are from the core, bail
+    // If there are no callbacks (probably because a whippet callback was skipped), bail
     //
 
     if(!isset($this->options['show-wp-hooks']) && $all_wp_core) {
+      return;
+    }
+
+    if(!count($callback_messages)) {
       return;
     }
 
@@ -620,7 +634,7 @@ class Whippet {
 
     $backtrace = debug_backtrace();
     foreach($backtrace as $i => $value) {
-      if($value['function'] == 'apply_filters' || $value['function'] == 'do_action') {
+      if($value['function'] == 'apply_filters' || $value['function'] == 'do_action' || $value['function'] == 'apply_filters_ref_array' || $value['function'] == 'do_action_ref_array') {
         $caller = $backtrace[$i + 1];
         
         if($value['function'] == 'apply_filters') {
@@ -640,7 +654,7 @@ class Whippet {
     //
 
     $message = 
-      Colours::fg('cyan') . "Hook triggered: " . 
+      Colours::fg('bold_cyan') . "Hook triggered: " . 
       Colours::fg('white') . "{$type} " . 
       Colours::fg('cyan') . "{$hook}" . 
       Colours::fg('white') . " called from function " . 
@@ -657,7 +671,6 @@ class Whippet {
     }
 
     $this->message("{$message}" . Colours::fg('white'));
-    $this->message("The following callback functions will execute:");
     foreach($callback_messages as $callback_message) {
       $this->message($callback_message);
     }

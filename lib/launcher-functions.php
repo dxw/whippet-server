@@ -40,7 +40,7 @@ function parse_arguments(&$argv) {
     "mime-file"   => "/etc/mime.types",
     "wp-root"     => ".",
     "wp-version"  => "latest",
-    "show-errors" => E_ALL,
+    "show-errors" => 'E_ALL',
     "show-hooks"  => '',
     "wordpresses" => $_SERVER['HOME'] . "/.cache/whippet/wordpresses", 
     "cb-cache"    => $_SERVER['HOME'] . "/.cache/whippet/callback-cache", 
@@ -70,6 +70,7 @@ function parse_arguments(&$argv) {
   $optparser->addRule('show-wp-queries');
   $optparser->addRule('show-wp-hooks');
   $optparser->addRule('show-errors::');
+  $optparser->addRule('show-everything');
   $optparser->addRule('wp-version::');
   $optparser->addRule('show-hooks::');
   $optparser->addRule('wordpresses::');
@@ -166,6 +167,12 @@ Options:
 
   --show-wp-hooks         Show calls to hooks that are set by the WordPress core. (Default: only show
                           calls that are set by files in wp-content)
+
+  --show-everything       Shows all the output that Whippet can display. Alias for:
+
+                            --show-wp-hooks --show-wp-errors --show-wp-queries --show-hooks '.*'
+
+                          This option will also override --no-sql et al, if set.
 
 Setting Defaults:
 

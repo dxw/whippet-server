@@ -15,7 +15,10 @@ class CallbackCache {
    */
   protected $hash_valid = array();
 
-  function __construct() {
+  /* A copy of Whippet's options array
+   */
+  function __construct($options) {
+    $this->options = $options;
   }
 
   function load($cache_file) {
@@ -32,7 +35,9 @@ class CallbackCache {
     }
     else {
       // No. Try to create it.
-      mkdir(dirname($this->cache_file));
+      if(!file_exists($this->cache_file)) {
+        mkdir(dirname($this->cache_file), 0644, true);
+      }
       return touch($this->cache_file);
     }
 
@@ -56,10 +61,6 @@ class CallbackCache {
     $callback_data['file'] = $file;
     $callback_data['line'] = $line;
     $callback_data['hash'] = md5_file($file);
-
-    // Make paths relative
-    $callback_data['file'] = str_replace($this->options['wp-root'], '', $callback_data['file']);
-    $callback_data['file'] = str_replace($this->options['wp-content'], '', $callback_data['file']);
 
     // If we're adding it, we don't need to check if it's changed if it's looked up again during this request
     $this->hash_valid[$function] = true;
