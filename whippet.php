@@ -354,18 +354,10 @@ if(WPS_LOCATION == 'wp-content') {
   system("ln -s '{$options['wp-content']}' '{$options['wp-root']}/wp-content'");
 }
 
-$portbit = ($options['p'] != 80 ? ":{$options['p']}/" : '');
 
 $inject  = <<<EOT
 
 ////Whippet START
-if(!defined('WP_SITEURL')) {
-  define('WP_SITEURL', "http://{$options['i']}{$portbit}");
-}
-
-if(!defined("WP_HOME")) {
-  define('WP_HOME', WP_SITEURL);
-}
 
 require_once(ABSPATH . 'wp-settings.php');
 

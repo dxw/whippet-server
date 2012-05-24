@@ -218,6 +218,16 @@ class Whippet {
     return true;
   }
 
+  /**
+   * Checks if this is a Multisite install and returns true if so
+   */
+  public function is_multisite() {
+    $config = file_get_contents($this->options['wp-root'] . '/wp-config.php');
+
+    // Look for MULTISITE
+    return preg_match('/MULTISITE.*true/im', $config);
+  }
+
   /** 
    * Called when the command is run. Sets up the options and environment and  
    * then passes off to a more specific handler
@@ -228,6 +238,19 @@ class Whippet {
     //
 
     $this->request_uri = parse_url($_SERVER['REQUEST_URI']);
+
+    // Is this a Multisite install?
+    if($this->is_multisite()) {
+      // We're in a Multisite install. There are a couple of extra steps.
+      if(preg_match('/^\/[_0-9a-zA-Z-]+\/(wp-(content|admin|includes).*)/', $this->request_uri['path'], $matches)) {
+        $this->request_uri['path'] = "/" . $matches[1];
+      }
+
+      if(preg_match('/^\/[_0-9a-zA-Z-]+\/(.*\.php)$/', $this->request_uri['path'], $matches)) {
+        $this->request_uri['path'] = "/" . $matches[1];
+      }
+    }
+
     $this->request_path = $this->options['wp-root'] . $this->request_uri['path'];
 
     // If the path is to a directory, append the default document
@@ -269,7 +292,9 @@ class Whippet {
       return $this->serve_file();
     }
 
-    // It's not a real file, so it must be a wordpress permalink. Execute index.php
+
+
+    // It's not a real file, and Multisite is not enabled, so it must be a wordpress permalink. Execute index.php
     $this->request_message();
     $this->message("Processing {$this->request_uri['path']}");
     return $this->serve_wordpress();
