@@ -1,4 +1,4 @@
-#!/usr/bin/php5
+#!/usr/bin/php
 <?php
 
 require dirname(__FILE__) . '/lib/colours.class.php';
