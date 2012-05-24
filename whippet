@@ -313,6 +313,8 @@ function signal_handler($signal) {
   }
 
   echo "\nQuitting.\n";
+  exec("reset");
+
   exit(0);
 }
 
@@ -421,7 +423,7 @@ else if(WPS_LOCATION == 'wp-content') {
 
 $valid_arguments = serialize($options);
 
-echo Colours::fg('blue');
+echo Colours::bg("black") . Colours::fg('blue');
 echo "Whippet version " . WPS_VERSION  . " started at " . date('H:i:s \o\n d-m-Y') . "\n";
 echo Colours::fg('white');
 echo "Written and maintained by dxw. Visit http://whippet.labs.dxw.com for more information.\n";
