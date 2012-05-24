@@ -29,6 +29,13 @@ Under OS X, do:
 
 You will need Homebrew: http://mxcl.github.com/homebrew/
 
+If you now have more than one version of PHP on your system, you may need to change the first line of the whippet 
+script to:
+
+    #!/usr/local/bin/php
+
+You can check by running php -v. It should be 5.4.x. At some point, we will figure out a more elegant solution.
+
 For other operating systems, please consult Google, or download and install from PHP.net: http://php.net/downloads.php
 
 You might also want to symlink Whippet to something in your path:
