@@ -582,6 +582,7 @@ class Whippet {
           // If we got it, add an entry to the cache
           if(!empty($file) && preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
             $this->cb_cache->add($function, $matches[1], $matches[2]);
+            $callback_data = $this->cb_cache->lookup($function);
           }
         }
 

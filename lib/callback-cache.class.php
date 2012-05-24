@@ -59,7 +59,10 @@ class CallbackCache {
 
     // Make paths relative
     $callback_data['file'] = str_replace($this->options['wp-root'], '', $callback_data['file']);
-    $callback_data['line'] = str_replace($this->options['wp-content'], '', $callback_data['file']);
+    $callback_data['file'] = str_replace($this->options['wp-content'], '', $callback_data['file']);
+
+    // If we're adding it, we don't need to check if it's changed if it's looked up again during this request
+    $this->hash_valid[$function] = true;
 
     $this->cache[$function] = $callback_data;
 
