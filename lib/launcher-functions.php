@@ -184,7 +184,7 @@ Setting Defaults:
 Feedback and help:
 
   Visit Github and check the wiki, open an issue or send us a message: https://github.com/dxw/whippet
-<?
+<?php
 
   exit(0);
 }
