@@ -42,7 +42,8 @@ function parse_arguments(&$argv) {
     "wp-version"  => "latest",
     "show-errors" => E_ALL,
     "show-hooks"  => '',
-    "wordpresses" => $_SERVER['HOME'] . "/.wordpresses", 
+    "wordpresses" => $_SERVER['HOME'] . "/.cache/whippet/wordpresses", 
+    "cb-cache"    => $_SERVER['HOME'] . "/.cache/whippet/callback-cache", 
   );
 
   // Are there some options in a config file? Check them in order.

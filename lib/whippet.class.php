@@ -1,5 +1,7 @@
 <?php
 
+require dirname(__FILE__) . '/callback-cache.class.php';
+
 define('WPS_VERSION', '0.1 ALPHA');
 
 class Whippet {
@@ -24,8 +26,20 @@ class Whippet {
   */
   public $start_time;
 
+  /* Used to manage a cache of hook callbacks
+   */
+  public $cb_cache;
+
   public function __construct() {
     date_default_timezone_set('UTC');
+
+    $this->options = $this->get_options();
+
+    $this->cb_cache = new CallbackCache();
+
+    if(!$this->cb_cache->load($this->options['cb-cache'])) {
+      $this->message(Colours::fg('brown') . "Warning: " . Colours::fg('white') . "Unable to load or create callback cache file {$this->options['cb-cache']}. Displaying hook data will be slow.");
+    }
   }
 
   /**
@@ -112,8 +126,8 @@ class Whippet {
    * Dumps an object to STDOUT, using print_r
    *
    */
-  public function print_r($variable) {
-    $this->message(print_r($variable, true));
+  static public function print_r($variable) {
+    Whippet::message(print_r($variable, true));
   }
 
 
@@ -208,8 +222,6 @@ class Whippet {
     //
     // Fetch options and set up the environment
     //
-
-    $this->options = $this->get_options();
 
     $this->request_uri = parse_url($_SERVER['REQUEST_URI']);
     $this->request_path = $this->options['wp-root'] . $this->request_uri['path'];
@@ -538,6 +550,8 @@ class Whippet {
     $all_wp_core = true;
 
     $hooks = $wp_filter[$hook];
+
+    // TODO: this erroneously reorders hooks with the same priority
     ksort($hooks, SORT_NUMERIC);
 
     foreach($hooks as $priority => $callbacks) {
@@ -555,43 +569,19 @@ class Whippet {
         }
 
         $callback_message =  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
+        $callback_data = $this->cb_cache->lookup($function);
 
-        if(file_exists(sys_get_temp_dir() . "/.whippet-callback-cache")) {
-          $callback_cache = unserialize(file_get_contents(sys_get_temp_dir() . "/.whippet-callback-cache"));
-        }
-        else {
-          $callback_cache = array();
-        }
-
-        $callback_data = false;
-
-        if(!empty($callback_cache[$this->options['wp-version']][$function])) {
-          $callback_data = $callback_cache[$this->options['wp-version']][$function];
-        }
-        else {
+        if(!$callback_data) {
+          // Find the function
           $file = exec("grep -rn 'function {$function}' {$this->options['wp-root']}/*");
 
           if(empty($file) && isset($this->options['wp-content'])) {
             $file = exec("grep -rn 'function {$function}' {$this->options['wp-content']}/*");
           }
 
-          if(!empty($file)) {
-            $file = str_replace($this->options['wp-root'], '', $file);
-            $file = str_replace($this->options['wp-content'], '', $file);
-
-            if(preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
-              $callback_data = array();
-              $callback_data['file'] = $matches[1];
-              $callback_data['line'] = $matches[2];
-
-              if(empty($callback_cache[$this->options['wp-version']])) {
-                $callback_cache[$this->options['wp-version']] = array();
-              }
-
-              $callback_cache[$this->options['wp-version']][$function] = $callback_data;
-
-              file_put_contents(sys_get_temp_dir() . "/.whippet-callback-cache", serialize($callback_cache));
-            }
+          // If we got it, add an entry to the cache
+          if(!empty($file) && preg_match('/^([^:]+):(\d+):/', $file, $matches)) {
+            $this->cb_cache->add($function, $matches[1], $matches[2]);
           }
         }
 
@@ -602,6 +592,9 @@ class Whippet {
           }
 
           $callback_message .= " in " . Colours::fg("brown") . str_replace($this->options['wp-root'] . "/wp-content/", '', $callback_data['file']) . Colours::fg("white") . " at line {$callback_data['line']}";
+        }
+        else {
+          $callback_message .= " (couldn't find this function anywhere!)";
         }
 
         $callback_messages[] = $callback_message;
@@ -639,6 +632,8 @@ class Whippet {
         break;
       }
     }
+
+
     //
     // Put together the message
     //
