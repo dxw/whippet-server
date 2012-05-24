@@ -568,7 +568,7 @@ class Whippet {
           return;
         }
 
-        $callback_message =  "\t" . Colours::fg('cyan') . "{$function} " .  Colours::fg('white') . " (Priority: {$priority})";
+        $callback_message =  "\t{$priority}: " . Colours::fg('cyan') . $function .  Colours::fg('white');
         $callback_data = $this->cb_cache->lookup($function);
 
         if(!$callback_data) {
@@ -595,7 +595,7 @@ class Whippet {
           $callback_message .= " in " . Colours::fg("brown") . str_replace($this->options['wp-root'] . "/wp-content/", '', $callback_data['file']) . Colours::fg("white") . " at line {$callback_data['line']}";
         }
         else {
-          $callback_message .= " (couldn't find this function anywhere!)";
+          $callback_message .= " (couldn't find this function's definition)";
         }
 
         $callback_messages[] = $callback_message;
