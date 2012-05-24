@@ -246,6 +246,8 @@ class Whippet {
 
     // Is it a real file, other than the root of the site?
     if($this->request_uri['path'] != '/' && file_exists($this->request_path)) {
+      // This gets set in load_whippet for wordpress requests, but that won't get included
+      register_shutdown_function(array($this, "shutdown"));
       
       // If so, is it PHP that we need to execute?
       if(preg_match('/\.php$/', $this->request_path) && !isset($this->options['no-scripts'])) {
@@ -497,7 +499,7 @@ class Whippet {
 
     $query_time = 0;
     $num_queries = 0;
-    $request = "Served asset {$this->request_uri['path']} - ";
+    $request = "Served asset {$this->request_uri['path']} -";
 
     if(isset($wpdb) && is_array($wpdb->queries)) {
       foreach($wpdb->queries as $query) {
