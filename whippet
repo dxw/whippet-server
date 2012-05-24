@@ -25,7 +25,7 @@ if($version_bits[0] < 5 || $version_bits[1] < 4) {
 // Libnotify
 $output = array();
 exec("which notify-send", $output);
-if(file_exists(trim($output[0]))) {
+if(!empty($output[0]) && file_exists(trim($output[0]))) {
   define("WPS_LIBNOTIFY_PATH", trim($output[0]));
 }
 
