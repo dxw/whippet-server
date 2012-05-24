@@ -249,6 +249,8 @@ class Whippet {
       if(preg_match('/^\/[_0-9a-zA-Z-]+\/(.*\.php)$/', $this->request_uri['path'], $matches)) {
         $this->request_uri['path'] = "/" . $matches[1];
       }
+
+      // TODO: Is there anything else we need to do?
     }
 
     $this->request_path = $this->options['wp-root'] . $this->request_uri['path'];
@@ -550,8 +552,18 @@ class Whippet {
     }
 
     $code = http_response_code();
+    $location = '';
 
-    $this->message("{$request} {$code} " . response_code_text($code) . " ({$request_time}s" . ($num_queries == 0 ? '' : ", {$num_queries} queries took {$query_time}s") . ")");
+    if(preg_match('/3\d\d/', $code)) {
+      foreach(headers_list() as $header) {
+        if(preg_match('/^Location: (.*)$/', $header, $matches)) {
+          $location = " => " . $matches[1];
+          break;
+        }
+      }
+    }
+
+    $this->message("{$request} {$code} " . response_code_text($code) . "$location ({$request_time}s" . ($num_queries == 0 ? '' : ", {$num_queries} queries took {$query_time}s") . ")");
   }
 
   /**
