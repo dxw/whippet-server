@@ -354,11 +354,22 @@ if(WPS_LOCATION == 'wp-content') {
   system("ln -s '{$options['wp-content']}' '{$options['wp-root']}/wp-content'");
 }
 
+$portbit = ($options['p'] != 80 ? ":{$options['p']}/" : '');
+
 $inject  = <<<EOT
-require_once(ABSPATH . 'wp-settings.php');
 
 ////Whippet START
-require('{$dir}/lib/load_whippet.php');
+if(!defined('WP_SITEURL')) {
+  define('WP_SITEURL', "http://{$options['i']}{$portbit}");
+}
+
+if(!defined("WP_HOME")) {
+  define('WP_HOME', WP_SITEURL);
+}
+
+require_once(ABSPATH . 'wp-settings.php');
+
+require_once('{$dir}/lib/load_whippet.php');
 ////Whippet END
 EOT;
 
@@ -367,7 +378,7 @@ if(WPS_LOCATION == 'root') {
   $wp_config = file_get_contents($options['wp-root'] . "/wp-config.php");
 
   // Modify it
-  $new_wp_config = str_replace("require_once(ABSPATH . 'wp-settings.php');", $inject, $wp_config);
+  $new_wp_config = preg_replace('/^.*wp-settings\.php.*$/m', $inject, $wp_config);
 
   // Save it
   file_put_contents($options['wp-root'] . "/wp-config.php", $new_wp_config);

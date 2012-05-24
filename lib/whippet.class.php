@@ -30,6 +30,10 @@ class Whippet {
    */
   public $cb_cache;
 
+  /* Flag used to ensure that only one shutdown function gets set
+  */
+  public $done_shutdown_function;
+
   public function __construct() {
     date_default_timezone_set('UTC');
 
@@ -246,8 +250,6 @@ class Whippet {
 
     // Is it a real file, other than the root of the site?
     if($this->request_uri['path'] != '/' && file_exists($this->request_path)) {
-      // This gets set in load_whippet for wordpress requests, but that won't get included
-      register_shutdown_function(array($this, "shutdown"));
       
       // If so, is it PHP that we need to execute?
       if(preg_match('/\.php$/', $this->request_path) && !isset($this->options['no-scripts'])) {
@@ -260,6 +262,9 @@ class Whippet {
       if(!isset($this->options['no-assets'])) {
         $this->request_message();
       }
+
+      // This gets set in load_whippet for wordpress requests, but that might not get included
+      $this->register_shutdown_function();
 
       return $this->serve_file();
     }
@@ -489,11 +494,19 @@ class Whippet {
     return $template;
   }
 
+  public function register_shutdown_function() {
+    register_shutdown_function(array($this, "wps_filter_shutdown"));
+  }
+
   /** 
    * Runs right at the end of execution
    */
-  public function shutdown() {
+  public function wps_filter_shutdown() {
     global $wpdb;
+
+    if($this->done_shutdown_function) {
+      return;
+    }
 
     $request_time = round(microtime(true) - $this->start_time, 3);
 
