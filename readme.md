@@ -27,6 +27,9 @@ Under OS X, there are some solutions here: http://stackoverflow.com/questions/95
 
 For other operating systems, please consult Google, or, you can download from PHP.net: http://php.net/downloads.php
 
+You might also want to symlink Whippet to something in your path:
+
+    $ sudo ln -s /path/to/the/script/called/whippet /usr/bin/whippet
 
 Usage
 -----
