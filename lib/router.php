@@ -1,6 +1,7 @@
 <?php
 
 require dirname(__FILE__) . "/colours.class.php";
+require dirname(__FILE__) . "/helpers.php";
 require dirname(__FILE__) . "/whippet.class.php";
 
 $whippet = new Whippet();

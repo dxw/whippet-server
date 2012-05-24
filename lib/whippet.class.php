@@ -250,7 +250,6 @@ class Whippet {
       // If so, is it PHP that we need to execute?
       if(preg_match('/\.php$/', $this->request_path) && !isset($this->options['no-scripts'])) {
         $this->request_message();
-        $this->message("Serving script {$this->request_path}");
 
         return $this->serve_script();
       }
@@ -258,7 +257,6 @@ class Whippet {
       // If not, assume it's a static asset
       if(!isset($this->options['no-assets'])) {
         $this->request_message();
-        $this->message("Serving asset {$this->request_uri['path']}\n");
       }
 
       return $this->serve_file();
@@ -490,27 +488,30 @@ class Whippet {
   }
 
   /** 
-   * Runs right at the end of Wordpress's PHP execution
+   * Runs right at the end of execution
    */
-
-  public function wps_filter_shutdown() {
+  public function shutdown() {
     global $wpdb;
 
-    $wordpress_time = round(microtime(true) - $this->start_time, 3);
+    $request_time = round(microtime(true) - $this->start_time, 3);
 
     $query_time = 0;
     $num_queries = 0;
+    $request = "Served asset {$this->request_uri['path']} - ";
 
-    if(is_array($wpdb->queries)) {
+    if(isset($wpdb) && is_array($wpdb->queries)) {
       foreach($wpdb->queries as $query) {
         $query_time += $query[1];
         $num_queries++;
       }
 
       $query_time = round($query_time, 3);
+      $request = "Completed";
     }
 
-    $this->message("Completed request in {$wordpress_time}s" . ($num_queries == 0? '.' : " ({$num_queries} queries took {$query_time}s)"));
+    $code = http_response_code();
+
+    $this->message("{$request} {$code} " . response_code_text($code) . " ({$request_time}s" . ($num_queries == 0 ? '' : ", {$num_queries} queries took {$query_time}s") . ")");
   }
 
   /**

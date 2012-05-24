@@ -14,9 +14,11 @@ define('WP_HOME', WP_SITEURL);
 define('SAVEQUERIES', true);
 
 // Add the filters that we want.
+register_shutdown_function(array($whippet, "shutdown"));
+
 add_filter("query", array($whippet, "wps_filter_query"), 9999, 1);
 add_filter("template_include", array($whippet, "wps_filter_template_include"), 9999, 1);
 add_filter("parse_query", array($whippet, "wps_filter_parse_query"), 9999, 1);
 
 add_action("all", array($whippet, "wps_filter_all"), 9999, 1);
-add_action("shutdown", array($whippet, "wps_filter_shutdown"), 9999);
+#add_action("shutdown", array($whippet, "wps_filter_shutdown"), 9999);
