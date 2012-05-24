@@ -23,9 +23,13 @@ Whippet requires PHP 5.4. Under Ubuntu, do:
     $ sudo apt-get update
     $ sudo apt-get install php5
 
-Under OS X, there are some solutions here: http://stackoverflow.com/questions/9534451/how-do-i-install-php-5-4-on-mac-os-x-lion
+Under OS X, do:
 
-For other operating systems, please consult Google, or, you can download from PHP.net: http://php.net/downloads.php
+    $ brew install php --devel
+
+You will need Homebrew: http://mxcl.github.com/homebrew/
+
+For other operating systems, please consult Google, or download and install from PHP.net: http://php.net/downloads.php
 
 You might also want to symlink Whippet to something in your path:
 
