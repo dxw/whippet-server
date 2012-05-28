@@ -40,6 +40,8 @@ use:
 
 You can check by running php -v. It should be 5.4.x. At some point, we will figure out a more elegant solution.
 
+For Windows, I think you might be out of luck. If you manage to get it working, we'd love to know what you did.
+
 For other operating systems, please consult Google, or download and install from PHP.net: http://php.net/downloads.php
 
 You might also want to symlink Whippet to something in your path:

@@ -446,6 +446,12 @@ $valid_arguments = serialize($options);
 
 echo Colours::bg("black") . Colours::fg('blue');
 echo "Whippet version " . WPS_VERSION  . " started at " . date('H:i:s \o\n d-m-Y') . "\n";
+
+echo Colours::fg('red');
+echo "\nNote: Whippet is Alpha software. We're sure it still has problems that need to be\n";
+echo "fixed, and we know the install process is a bit labourious. Please do let us know\n";
+echo "how you get on, or open an issue on GitHub if you have problems. Thanks!\n\n";
+
 echo Colours::fg('white');
 echo "Written and maintained by dxw. Visit http://whippet.labs.dxw.com for more information.\n";
 
