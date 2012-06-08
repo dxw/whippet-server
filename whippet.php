@@ -123,7 +123,7 @@ if(defined('WPS_LIBNOTIFY_PATH')) {
 // If a wp-content folder, assume that there is no WP folder and
 // that we need to twiddle things around
 
-if(file_exists($options['wp-root'] . '/wp-config.php') && file_exists($options['wp-root'] . '/wp-includes')) {
+if((file_exists($options['wp-root'] . '/wp-config.php') || file_exists($options['wp-root'] . '/../wp-config.php')) && file_exists($options['wp-root'] . '/wp-includes')) {
   //
   // We are in a WordPress root.
   //
@@ -224,9 +224,9 @@ if(!is_dir($options['wp-root'])) {
 }
 
 // If location is root, check that the wordpress directory contains a wordpress installation
-if(WPS_LOCATION == 'root' && !file_exists($options['wp-root'] . '/wp-config.php')) {
+if(WPS_LOCATION == 'root' && !file_exists($options['wp-root'] . '/wp-config.php') && !file_exists($options['wp-root'] . '/../wp-config.php')) {
   die_with_error(
-    "Unable to find wp-config.php in your wordpress directory: {$options['wp-root']}",
+    "Unable to find wp-config.php in your wordpress directory ({$options['wp-root']}) or its parent.",
     "Is there a wordpress installation in your current directory? If not, specify the path with --wp-root"
   );
 }
@@ -369,7 +369,20 @@ EOT;
 
 // Get the config
 if(WPS_LOCATION == 'root') {
-  $wp_config = file_get_contents($options['wp-root'] . "/wp-config.php");
+  $wp_config = '';
+
+  if(file_exists($options['wp-root'] . "/wp-config.php")) {
+    $wp_config = file_get_contents($options['wp-root'] . "/wp-config.php");
+  }
+  else if(file_exists($options['wp-root'] . "/../wp-config.php")) {
+    $wp_config = file_get_contents($options['wp-root'] . "/../wp-config.php");
+  }
+  else {
+    die_with_error(
+      "Unable to find wp-config.php at {$options['wp-root']} or " . dirname($options['wp-root']),
+      "This shouldn't happen. Please report this bug!"
+    );
+  }
 
   // Modify it
   $new_wp_config = preg_replace('/^.*wp-settings\.php.*$/m', $inject, $wp_config);
