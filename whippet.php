@@ -192,11 +192,14 @@ EOT;
       if(getenv("VISUAL")) {
         system("\$VISUAL {$options['wp-root']}/whippet-wp-config.php > `tty`");
       }
+      else if(getenv("EDITOR")) {
+        system("\$EDITOR {$options['wp-root']}/whippet-wp-config.php > `tty`");
+      }
       else {
         echo 
           "Created settings file at {$options['wp-root']}/whippet-wp-config.php, but could\n" .
-          "not load your editor because \$VISUAL is not set. Please add your database configuration\n" .
-          "to this file and restart Whippet\n";
+          "not load your editor because neither \$VISUAL nor \$EDITOR are set. Please add\n" .
+          "your database configuration to this file and restart Whippet\n";
 
         exit(1);
       }
