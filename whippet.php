@@ -7,7 +7,6 @@ require dirname(__FILE__) . '/lib/whippet.class.php';
 require dirname(__FILE__) . '/lib/optionparser/lib/OptionParser.php';
 require dirname(__FILE__) . '/lib/launcher-functions.php';
 
-
 //
 // Check that the environment we're running in is sane, and explain what's
 // wrong if it's not.
@@ -473,7 +472,7 @@ echo "Press Ctrl-C to quit.\n";
 // The file gets deleted when the user quits.
 //
 
-$handle = popen("echo '{$valid_arguments}' | php -S {$options['i']}:{$options['p']} " . dirname(__FILE__) . "/lib/router.php 2>&1", 'r');
+$handle = popen("echo '{$valid_arguments}' | " . PHP_BINARY  . " -S {$options['i']}:{$options['p']} " . dirname(__FILE__) . "/lib/router.php 2>&1", 'r');
 
 while(!feof($handle)) {
   $line = fgets($handle);
