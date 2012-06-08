@@ -25,7 +25,7 @@ class CallbackCache {
     $this->cache_file = $cache_file;
 
     // Is there a cache file?
-    if(file_exists($this->cache_file)) {
+    if(file_exists($this->cache_file) && filesize($this->cache_file)) {
       // Yes. Try to load it.
       $this->cache = unserialize(file_get_contents($this->cache_file));
 
