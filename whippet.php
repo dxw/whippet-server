@@ -13,9 +13,7 @@ require dirname(__FILE__) . '/lib/launcher-functions.php';
 //
 
 // PHP version
-$version_bits = explode('.', phpversion());
-
-if($version_bits[0] < 5 || $version_bits[1] < 4) {
+if (version_compare(PHP_VERSION, '5.4.0', '<')) {
   die_with_error("whippet requires PHP 5.4 or greater");
 }
 
