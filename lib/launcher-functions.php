@@ -42,6 +42,7 @@ function parse_arguments(&$argv) {
     "wp-version"  => "latest",
     "show-errors" => 'E_ALL',
     "show-hooks"  => '',
+    "show-everything" => false,
     "wordpresses" => $_SERVER['HOME'] . "/.cache/whippet/wordpresses", 
     "cb-cache"    => $_SERVER['HOME'] . "/.cache/whippet/callback-cache", 
   );
