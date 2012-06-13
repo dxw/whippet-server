@@ -361,6 +361,13 @@ $inject  = <<<EOT
 
 ////Whippet START
 
+if(!defined('WP_SITEURL')) {
+  define('WP_SITEURL', "http://{\$whippet->options['i']}" . (\$whippet->options['p'] != 80 ? ":{\$whippet->options['p']}/" : ''));
+}
+
+if(!defined("WP_HOME")) {
+  define('WP_HOME', WP_SITEURL);
+}
 require_once(ABSPATH . 'wp-settings.php');
 
 require_once('{$dir}/lib/load_whippet.php');
@@ -507,10 +514,6 @@ while(!feof($handle)) {
       case "PHP Fatal": $number = E_ERROR;
     }
 
-    if(!isset($options['show-wp-errors']) && strpos($matches[4], 'wp-content') === false && strpos($matches[4], 'wp-config.php') === false) {
-      continue;
-    }
-    
     Whippet::emit_php_error($number, $matches[3], $matches[4], $matches[5], $options);
     continue;
   }

@@ -12,14 +12,6 @@ if(!defined("SAVEQUERIES")) {
   define('SAVEQUERIES', true);
 }
 
-if(!defined('WP_SITEURL')) {
-  define('WP_SITEURL', "http://{$whippet->options['i']}" . ($whippet->options['p'] != 80 ? ":{$whippet->options['p']}/" : ''));
-}
-
-if(!defined("WP_HOME")) {
-  define('WP_HOME', WP_SITEURL);
-}
-
 add_filter("query", array($whippet, "wps_filter_query"), 9999, 1);
 add_filter("template_include", array($whippet, "wps_filter_template_include"), 9999, 1);
 add_filter("parse_query", array($whippet, "wps_filter_parse_query"), 9999, 1);

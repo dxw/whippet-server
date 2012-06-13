@@ -148,6 +148,11 @@ class Whippet {
    * the bootstrap script.
    */
   static public function emit_php_error($number, $error, $file, $line, $options = array('show-errors' => E_ALL)) {
+
+    if(!isset($options['show-wp-errors']) && Whippet::file_is_in_core($file, $options)) {
+      return;
+    }
+
     $error_type = array (
       E_ERROR          => 'Fatal error',
       E_WARNING        => 'Warning',
@@ -199,20 +204,18 @@ class Whippet {
     }
   }
 
+  static public function file_is_in_core($file, $options) {
+    if(!empty($options['wp-content'])) {
+      return strpos($file, $options['wp-content']) === false;
+    }
+
+    return strpos($file, WP_CONTENT_DIR) === false;
+  }
+
   /** 
    * Called by the PHP core when an error occurs
    */
   public function handle_php_error($number, $error, $file, $line, $context) {
-
-    // Don't show errors from the WordPress core unless the user wants them
-    // Note: Changes made to these conditions should also be made in the output
-    // filters section in the bootstrap script
-    if(!isset($this->options['show-wp-errors']) && strpos($file, 'wp-content') === false && strpos($file, 'wp-config.php') === false) {
-      return true;
-    }
-
-    $file = str_replace($this->options['wp-root'], '', $file);
-
     $this->emit_php_error($number, $error, $file, $line, $this->options);
 
     return true;
