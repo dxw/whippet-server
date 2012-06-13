@@ -311,16 +311,16 @@ function signal_handler($signal) {
 
   // Restore original wp-config
   if(WPS_LOCATION == 'root') {
-    if(file_exists(sys_get_temp_dir() . "/.whippet-original-wp-config")) {
-      file_put_contents($options['wp-config'], file_get_contents(sys_get_temp_dir() . "/.whippet-original-wp-config"));
+    if(file_exists(dirname($options['wp-config']). "/wp-config-original.whippet.bak")) {
+      file_put_contents($options['wp-config'], file_get_contents(dirname($options['wp-config']). "/wp-config-original.whippet.bak"));
 
-      unlink(sys_get_temp_dir() . "/.whippet-original-wp-config");
+      unlink(dirname($options['wp-config']). "/wp-config-original.whippet.bak");
     }
     else {
       if(WPS_LOCATION == 'root') {
         Whippet::message(
           Colours::fg('red') . "Error: " . Colours::fg('white') . "Unable to find wp-config backup file; could not restore original configuration",
-          "Your wp-config file should have been backed up at " . sys_get_temp_dir()  . "/.whippet-original-wp-config, but\n" .
+          "Your wp-config file should have been backed up at " . dirname($options['wp-config']). "/wp-config-original.whippet.bak, but\n" .
           "it is missing or unreadable. You should edit your wp-config.php by hand to remove the\n" .
           "Whippet sections.\n");
       }
@@ -396,7 +396,7 @@ if(WPS_LOCATION == 'root') {
   file_put_contents($options['wp-config'], $new_wp_config);
 
   // Save the original one so we can restore it later
-  file_put_contents(sys_get_temp_dir() . "/.whippet-original-wp-config", $wp_config);
+  file_put_contents(dirname($options['wp-config']). "/wp-config-original.whippet.bak", $wp_config);
 }
 else if(WPS_LOCATION == 'wp-content') {
   $new_wp_config = file_get_contents("{$options['wp-content']}/whippet-wp-config.php");
