@@ -312,7 +312,7 @@ function signal_handler($signal) {
   // Restore original wp-config
   if(WPS_LOCATION == 'root') {
     if(file_exists(sys_get_temp_dir() . "/.whippet-original-wp-config")) {
-      file_put_contents($options['wp-root'] . "/wp-config.php", file_get_contents(sys_get_temp_dir() . "/.whippet-original-wp-config"));
+      file_put_contents($options['wp-config'], file_get_contents(sys_get_temp_dir() . "/.whippet-original-wp-config"));
 
       unlink(sys_get_temp_dir() . "/.whippet-original-wp-config");
     }
@@ -374,13 +374,11 @@ EOT;
 
 // Get the config
 if(WPS_LOCATION == 'root') {
-  $wp_config = '';
-
   if(file_exists($options['wp-root'] . "/wp-config.php")) {
-    $wp_config = file_get_contents($options['wp-root'] . "/wp-config.php");
+    $options['wp-config'] = $options['wp-root'] . "/wp-config.php";
   }
   else if(file_exists($options['wp-root'] . "/../wp-config.php")) {
-    $wp_config = file_get_contents($options['wp-root'] . "/../wp-config.php");
+    $options['wp-config'] = $options['wp-root'] . "/../wp-config.php";
   }
   else {
     die_with_error(
@@ -389,11 +387,13 @@ if(WPS_LOCATION == 'root') {
     );
   }
 
+  $wp_config = file_get_contents($options['wp-config']);
+
   // Modify it
   $new_wp_config = preg_replace('/^.*wp-settings\.php.*$/m', $inject, $wp_config);
 
   // Save it
-  file_put_contents($options['wp-root'] . "/wp-config.php", $new_wp_config);
+  file_put_contents($options['wp-config'], $new_wp_config);
 
   // Save the original one so we can restore it later
   file_put_contents(sys_get_temp_dir() . "/.whippet-original-wp-config", $wp_config);
