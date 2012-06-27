@@ -21,6 +21,14 @@ class Whippet {
   */
   public $request_uri;
 
+  /* The type of request we're serving 
+   */
+  public $request_type;
+
+  const ASSET = 'ASSET';
+  const WP = 'WP';
+  const SCRIPT = 'SCRIPT';
+
 
   /* The time this request started being processed
   */
@@ -287,7 +295,7 @@ class Whippet {
       }
 
       // If not, assume it's a static asset
-      if(!isset($this->options['no-assets'])) {
+      if($this->options['show-assets']) {
         $this->request_message();
       }
 
@@ -329,6 +337,8 @@ class Whippet {
     // Work out what the content type is
     //
 
+    $this->request_type = Whippet::ASSET;
+
     // Default to the official WTF mime type
     $content_type = "application/octet-stream";
 
@@ -365,7 +375,9 @@ class Whippet {
 
     $this->serve_headers();
 
-    echo file_get_contents($this->request_path);
+    if($this->options['show-assets']) {
+      echo file_get_contents($this->request_path);
+    }
 
     return '';
   }
@@ -374,6 +386,8 @@ class Whippet {
    * Serves a specific script; for example, /wp-admin/install.php
    */
   public function serve_script() {
+    $this->request_type = Whippet::SCRIPT;
+
     // Change to the script's directory so that relative includes work
     chdir(dirname($this->request_path));
 
@@ -388,6 +402,8 @@ class Whippet {
    * Serves a wordpress permalink
    */
   public function serve_wordpress() {
+    $this->request_type = Whippet::WP;
+
     // Change to index.php's directory
     chdir($this->options['wp-root']);
 
@@ -535,6 +551,10 @@ class Whippet {
     global $wpdb;
 
     if($this->done_shutdown_function) {
+      return;
+    }
+
+    if(!$this->options['show-assets'] && $this->request_type == Whippet::ASSET) {
       return;
     }
 
