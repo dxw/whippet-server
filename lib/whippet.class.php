@@ -375,9 +375,7 @@ class Whippet {
 
     $this->serve_headers();
 
-    if($this->options['show-assets']) {
-      echo file_get_contents($this->request_path);
-    }
+    echo file_get_contents($this->request_path);
 
     return '';
   }
