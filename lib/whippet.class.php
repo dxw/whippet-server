@@ -156,8 +156,7 @@ class Whippet {
    * the bootstrap script.
    */
   static public function emit_php_error($number, $error, $file, $line, $options = array('show-errors' => E_ALL)) {
-
-    if(!isset($options['show-wp-errors']) && Whippet::file_is_in_core($file, $options)) {
+    if($number != E_ERROR && !isset($options['show-wp-errors']) && Whippet::file_is_in_core($file, $options)) {
       return;
     }
 
@@ -176,7 +175,7 @@ class Whippet {
       E_STRICT         => 'Strict notice',
       E_RECOVERABLE_ERROR  => 'Recoverable error',
       E_DEPRECATED     => 'Deprecated',
-      E_USER_DEPRECATED     => 'Deprecated',
+      E_USER_DEPRECATED     => 'User Deprecated',
     );
 
     // If the error is unknown, pass it through directly
