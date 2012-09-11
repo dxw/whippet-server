@@ -509,7 +509,7 @@ while(!feof($handle)) {
     $number = $matches[2];
     switch($matches[2]) {
       case "PHP Parse": $number = E_PARSE;
-      case "PHP Fatal": $number = E_ERROR;
+      case "PHP Fatal error": $number = E_ERROR;
     }
 
     Whippet::emit_php_error($number, $matches[3], $matches[4], $matches[5], $options);
