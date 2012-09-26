@@ -366,6 +366,11 @@ if(!defined('WP_SITEURL')) {
 if(!defined("WP_HOME")) {
   define('WP_HOME', WP_SITEURL);
 }
+
+// Set some useful constants
+define("WP_MAX_MEMORY_LIMIT", "512M");
+define("WP_MEMORY_LIMIT", "512M");
+
 require_once(ABSPATH . 'wp-settings.php');
 
 require_once('{$dir}/lib/load_whippet.php');
@@ -505,10 +510,11 @@ while(!feof($handle)) {
 
   // Deal with PHP errors that the error handler can't manage
   if(preg_match('/(\[.+\]) (PHP .+):  (.+) in (.+) on line (\d+)$/', $line, $matches)) {
+  echo $line;
 
     $number = $matches[2];
     switch($matches[2]) {
-      case "PHP Parse": $number = E_PARSE;
+      case "PHP Parse error": $number = E_PARSE;
       case "PHP Fatal error": $number = E_ERROR;
     }
 
