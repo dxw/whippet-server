@@ -510,8 +510,6 @@ while(!feof($handle)) {
 
   // Deal with PHP errors that the error handler can't manage
   if(preg_match('/(\[.+\]) (PHP .+):  (.+) in (.+) on line (\d+)$/', $line, $matches)) {
-  echo $line;
-
     $number = $matches[2];
     switch($matches[2]) {
       case "PHP Parse error": $number = E_PARSE;
