@@ -309,6 +309,11 @@ function signal_handler($signal) {
     unlink(sys_get_temp_dir() . "/.whippet-output");
   }
 
+  // Delete the callback cache
+  if(file_exists($options['cb-cache'])) {
+    unlink($options['cb-cache']);
+  }
+
   // Restore original wp-config
   if(WPS_LOCATION == 'root') {
     if(file_exists(dirname($options['wp-config']). "/wp-config-original.whippet.bak")) {
