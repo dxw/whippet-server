@@ -377,6 +377,17 @@ if(!defined("WP_HOME")) {
   define('WP_HOME', WP_SITEURL);
 }
 
+if (\$whippet->options['multisite']) {
+  define('WP_ALLOW_MULTISITE', true);
+  define('MULTISITE', true);
+  define('SUBDOMAIN_INSTALL', false);
+  \$base = '/';
+  define('DOMAIN_CURRENT_SITE', \$whippet->options['i']);
+  define('PATH_CURRENT_SITE', '/');
+  define('SITE_ID_CURRENT_SITE', 1);
+  define('BLOG_ID_CURRENT_SITE', 1);
+}
+
 // Set some useful constants
 define("WP_MAX_MEMORY_LIMIT", "512M");
 define("WP_MEMORY_LIMIT", "512M");

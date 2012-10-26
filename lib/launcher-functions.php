@@ -46,6 +46,7 @@ function parse_arguments(&$argv) {
     "show-everything" => false,
     "wordpresses" => $_SERVER['HOME'] . "/.cache/whippet/wordpresses", 
     "cb-cache"    => $_SERVER['HOME'] . "/.cache/whippet/callback-cache", 
+    "multisite"   => false,
   );
 
   // Are there some options in a config file? Check them in order.
@@ -62,6 +63,7 @@ function parse_arguments(&$argv) {
   $optparser->addRule('h|help');
   $optparser->addRule('i::');
   $optparser->addRule('p::');
+  $optparser->addRule('multisite');
   $optparser->addRule('mime-file::');
   $optparser->addRule('no-sql');
   $optparser->addRule('no-templates');
@@ -113,6 +115,8 @@ Options:
 
   -i <interface address>  Specify an interface to listen on. (Default: localhost)
   -p <port>               Specify a port number to listen on. (Default: 8000)
+
+  --multisite             Activate and enable multisite.
 
   --mime-file <filename>  Specify a path to a mime.types file containg content-type
                           rules. The most recent version of this file is available at:
