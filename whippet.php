@@ -314,6 +314,11 @@ function signal_handler($signal) {
     unlink($options['cb-cache']);
   }
 
+  // Delete the wp-content symlink
+  if(file_exists("{$options['wp-root']}/wp-content")) {
+    unlink("{$options['wp-root']}/wp-content");
+  }
+
   // Restore original wp-config
   if(WPS_LOCATION == 'root') {
     if(file_exists(dirname($options['wp-config']). "/wp-config-original.whippet.bak")) {
