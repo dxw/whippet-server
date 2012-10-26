@@ -125,7 +125,7 @@ Options:
                           of WordPress that should be loaded. (Default: latest)
 
   --wordpresses <path>    Specify a path to the directory where Whippet should download and store 
-                          WordPress core files. (Default: ~/.wordpresses)
+                          WordPress core files. (Default: ~/.cache/whippet/wordpresses)
 
   --show-errors <errors>  A specification of PHP error types to be displayed. You can use any 
                           specification that you might normally use for error_reporting, 
