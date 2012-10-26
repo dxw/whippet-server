@@ -377,8 +377,8 @@ if(!defined("WP_HOME")) {
   define('WP_HOME', WP_SITEURL);
 }
 
+define('WP_ALLOW_MULTISITE', true);
 if (\$whippet->options['multisite']) {
-  define('WP_ALLOW_MULTISITE', true);
   define('MULTISITE', true);
   define('SUBDOMAIN_INSTALL', false);
   \$base = '/';
