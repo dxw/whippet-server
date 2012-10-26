@@ -241,12 +241,8 @@ class Whippet {
 
     // Is this a Multisite install?
     if($this->options['multisite']) {
-      // We're in a Multisite install. There are a couple of extra steps.
+      // We're in a Multisite install. There are a couple of extra steps. Or just one?
       if(preg_match('/^\/[_0-9a-zA-Z-]+\/(wp-(content|admin|includes).*)/', $this->request_uri['path'], $matches)) {
-        $this->request_uri['path'] = "/" . $matches[1];
-      }
-
-      if(preg_match('/^\/[_0-9a-zA-Z-]+\/(.*\.php)$/', $this->request_uri['path'], $matches)) {
         $this->request_uri['path'] = "/" . $matches[1];
       }
 
