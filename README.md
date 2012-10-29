@@ -27,10 +27,14 @@ You might also want to symlink Whippet to something in your path:
 
 Whippet requires PHP 5.4. To install do:
 
-### Under Ubuntu
+### Under Ubuntu 12.04 LTS
 
     $ sudo add-apt-repository ppa:ondrej/php5
     $ sudo apt-get update
+    $ sudo apt-get install php5
+
+### Under Ubuntu 12.10
+
     $ sudo apt-get install php5
 
 ### Under OS X
