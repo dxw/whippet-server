@@ -249,7 +249,11 @@ class Whippet {
       // TODO: Is there anything else we need to do?
     }
 
-    $this->request_path = $this->options['wp-root'] . $this->request_uri['path'];
+    if ($this->startswith($this->request_uri['path'], '/wp-content/')) {
+      $this->request_path = $this->options['wp-content'] . substr($this->request_uri['path'], 11);
+    } else {
+      $this->request_path = $this->options['wp-root'] . $this->request_uri['path'];
+    }
 
     // If the path is to a directory, append the default document
     if(is_dir($this->request_path)) {
@@ -756,5 +760,9 @@ class Whippet {
     else {
       $this->message("Parameters: " . join(", ", $params));
     }
+  }
+
+  public function startswith($haystack, $needle) {
+    return substr($haystack, 0, strlen($needle)) === $needle;
   }
 }
