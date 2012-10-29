@@ -314,11 +314,6 @@ function signal_handler($signal) {
     unlink($options['cb-cache']);
   }
 
-  // Delete the wp-content symlink
-  if(file_exists("{$options['wp-root']}/wp-content")) {
-    unlink("{$options['wp-root']}/wp-content");
-  }
-
   // Restore original wp-config
   if(WPS_LOCATION == 'root') {
     if(file_exists(dirname($options['wp-config']). "/wp-config-original.whippet.bak")) {
@@ -338,7 +333,6 @@ function signal_handler($signal) {
   }
   else if(WPS_LOCATION == 'wp-content') {
     unlink("{$options['wp-root']}/wp-config.php");
-    unlink("{$options['wp-root']}/wp-content");
   }
 
   echo "\nQuitting.\n\033[0m";
@@ -357,17 +351,14 @@ if(WPS_LOCATION == 'wp-content') {
   // Move wp-root to the actual wordpress root
   $options['wp-content'] = $options['wp-root'];
   $options['wp-root'] = "{$options['wordpresses']}/{$options['wp-version']}";
-
-  // Hook up the wp-content folder -- this is simple, but is it bad? It does mean core files
-  // for a particular version can only be used by one running instance at a time, but that 
-  // might not matter
-  system("ln -s '{$options['wp-content']}' '{$options['wp-root']}/wp-content'");
 }
 
 
 $inject  = <<<EOT
 
 ////Whippet START
+
+define('WP_CONTENT_DIR', \$whippet->options['wp-content']);
 
 if(!defined('WP_SITEURL')) {
   define('WP_SITEURL', "http://{\$whippet->options['i']}" . (\$whippet->options['p'] != 80 ? ":{\$whippet->options['p']}/" : ''));
