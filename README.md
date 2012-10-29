@@ -81,18 +81,24 @@ to keep a full WordPress installation for each site that you work on, you can ju
 wp-content folder, along with the database for that site:
 
     $ cd /path/to/wp-content
-    $ path/to/whippet
+    $ /path/to/whippet
 
 Whippet will detect that it's being launched from a wp-content folder. The first time you do
 this, it will ask to download and store the latest WordPress core. It'll then use those files 
 to launch the site. You can also specify the version of WordPress you'd like to use:
 
-    $ path/to/whippet --wp-version 3.1
+    $ /path/to/whippet --wp-version 3.1
 
 Whippet will ask to download the files if they don't already exist, and will prompt you for 
 your database configuration the first time you run it for a particular wp-content diretory.
 
-### Troubleshooting ###
+### Multisite
+
+`WP_ALLOW_MULTISITE` is always enabled, so you can do Tools > Network Setup at any time. Once
+multisite has been setup in the database, you should send whippet a SIGTERM and restart it
+with `--multisite` and `-p 80`.
+
+### Troubleshooting
 #### Issue:
 After installing on OSX and running whippet you get the following error in your browser:
 
