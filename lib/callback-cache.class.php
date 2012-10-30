@@ -36,7 +36,7 @@ class CallbackCache {
     else {
       // No. Try to create it.
       if(!file_exists($this->cache_file)) {
-        if(!mkdir(dirname($this->cache_file), 0644, true)) {
+        if(!@mkdir(dirname($this->cache_file), 0644, true)) {
           return false;
         }
       }
