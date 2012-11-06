@@ -98,6 +98,12 @@ your database configuration the first time you run it for a particular wp-conten
 multisite has been setup in the database, you should send whippet a SIGTERM and restart it
 with `--multisite` and `-p 80`.
 
+Note that if you don't want to do a search/replace on your database you should use `-p 80`
+before you enable multisite.
+
+Remember that `sudo` is required for port 80 and you may need to kill a server if you already
+have on listening on port 80.
+
 ### Troubleshooting
 #### Issue:
 After installing on OSX and running whippet you get the following error in your browser:
