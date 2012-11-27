@@ -52,7 +52,11 @@ use:
    
     $ WHIPPET_PHP=/usr/bin/local/php whippet 
 
-You can check by running php -v. It should be 5.4.x. At some point, we will figure out a more elegant solution.
+If you installed PHP 5.4 using Homebrew then your path may look more like this: /usr/local/Cellar/php54/5.4.7/bin/php
+
+You can check if defining WHIPPET_PHP is necessary by running php -v. It should hopefully be 5.4.x, otherwise you'll need to find the path to the correct install. 
+
+At some point, we will figure out a more elegant solution.
 
 ### Other operating systems
 For Windows, I think you might be out of luck. If you manage to get it working, we'd love to know what you did.
