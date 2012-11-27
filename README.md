@@ -45,6 +45,8 @@ Whippet requires PHP 5.4. To install do:
 
 You will need Homebrew: http://mxcl.github.com/homebrew/
 
+For more information on the php54 install, see here: https://github.com/josegonzalez/homebrew-php
+
 If you now have more than one version of PHP on your system, you may need to tell Whippet which one to
 use:
    
