@@ -39,7 +39,9 @@ Whippet requires PHP 5.4. To install do:
 
 ### Under OS X
 
-    $ brew install php --devel --with-mysql
+    $ brew tap homebrew/dupes
+    $ brew tap josegonzalez/homebrew-php
+    $ brew install php54 --devel --with-mysql
 
 You will need Homebrew: http://mxcl.github.com/homebrew/
 
