@@ -39,16 +39,24 @@ Whippet requires PHP 5.4. To install do:
 
 ### Under OS X
 
-    $ brew install php --devel --with-mysql
+    $ brew tap homebrew/dupes
+    $ brew tap josegonzalez/homebrew-php
+    $ brew install php54 --devel --with-mysql
 
 You will need Homebrew: http://mxcl.github.com/homebrew/
+
+For more information on the php54 install, see here: https://github.com/josegonzalez/homebrew-php
 
 If you now have more than one version of PHP on your system, you may need to tell Whippet which one to
 use:
    
     $ WHIPPET_PHP=/usr/bin/local/php whippet 
 
-You can check by running php -v. It should be 5.4.x. At some point, we will figure out a more elegant solution.
+If you installed PHP 5.4 using Homebrew then your path may look more like this: /usr/local/Cellar/php54/5.4.7/bin/php
+
+You can check if defining WHIPPET_PHP is necessary by running php -v. It should hopefully be 5.4.x, otherwise you'll need to find the path to the correct install. 
+
+At some point, we will figure out a more elegant solution.
 
 ### Other operating systems
 For Windows, I think you might be out of luck. If you manage to get it working, we'd love to know what you did.
@@ -97,6 +105,12 @@ your database configuration the first time you run it for a particular wp-conten
 `WP_ALLOW_MULTISITE` is always enabled, so you can do Tools > Network Setup at any time. Once
 multisite has been setup in the database, you should send whippet a SIGTERM and restart it
 with `--multisite` and `-p 80`.
+
+Note that if you don't want to do a search/replace on your database you should use `-p 80`
+before you enable multisite.
+
+Remember that `sudo` is required for port 80 and you may need to kill a server if you already
+have on listening on port 80.
 
 ### Troubleshooting
 #### Issue:
