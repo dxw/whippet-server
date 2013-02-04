@@ -47,6 +47,16 @@ You will need Homebrew: http://mxcl.github.com/homebrew/
 
 For more information on the php54 install, see here: https://github.com/josegonzalez/homebrew-php
 
+### Existing users of MAMP
+
+If you already use MAMP and have installed PHP 5.4 via Homebrew, PHP needs to know to use MAMP's MySQL server. To fix this, update your php.ini:
+
+    $ sudo vi /usr/local/etc/php/5.4/php.ini
+
+And put in the option for mysql.default_socket:
+
+    mysql.default_socket = /Applications/MAMP/tmp/mysql/mysql.sock
+
 If you now have more than one version of PHP on your system, you may need to tell Whippet which one to
 use:
    
