@@ -36,7 +36,7 @@ class CallbackCache {
     else {
       // No. Try to create it.
       if(!file_exists($this->cache_file)) {
-        if(!file_exists(dirname($this->cache_file)) && !@mkdir(dirname($this->cache_file), 0644, true)) {
+        if(!file_exists(dirname($this->cache_file)) && !@mkdir(dirname($this->cache_file), 0755, true)) {
           return false;
         }
       }
@@ -75,7 +75,7 @@ class CallbackCache {
   function lookup($function) {
     if(!empty($this->cache[$function])) {
       // Check that the file has not been modified since the cache was saved.
-      // If it has been, invalidate the entry. 
+      // If it has been, invalidate the entry.
       if(!isset($this->hash_valid[$function]) && $this->cache[$function]['hash'] != md5_file($this->cache[$function]['file'])) {
         $this->remove($function);
 
