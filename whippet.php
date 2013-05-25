@@ -360,6 +360,9 @@ if(WPS_LOCATION == 'wp-content') {
   $options['wp-content'] = $options['wp-root'];
   $options['wp-root'] = "{$options['wordpresses']}/{$options['wp-version']}";
 }
+else {
+  $options['wp-content'] = $options['wp-root'] . '/wp-content';
+}
 
 
 $inject  = <<<EOT
