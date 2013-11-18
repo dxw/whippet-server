@@ -25,31 +25,54 @@ You might also want to symlink Whippet to something in your path:
 
     $ sudo ln -s /path/to/the/script/called/whippet /usr/bin/whippet
 
-Whippet requires PHP 5.4. To install do:
+### PHP 5.4
 
-### Under Ubuntu 12.04 LTS
+Whippet requires PHP 5.4. 
+
+Check which version you're currently using by running php -v. It should hopefully be 5.4.x
+
+To install do:
+
+#### Under Ubuntu 12.04 LTS
 
     $ sudo add-apt-repository ppa:ondrej/php5
     $ sudo apt-get update
     $ sudo apt-get install php5
 
-### Under Ubuntu 12.10
+#### Under Ubuntu 12.10
 
     $ sudo apt-get install php5
 
-### Under OS X
+#### Under OSX
 
-    $ brew tap homebrew/dupes
-    $ brew tap josegonzalez/homebrew-php
-    $ brew install php54 --devel --with-mysql
+See http://php-osx.liip.ch/ for an easy install
 
-You will need Homebrew: http://mxcl.github.com/homebrew/
+Depending on how your path is set up, you may need to add the install location to your path (edit your .bashrc or similar)
 
-For more information on the php54 install, see here: https://github.com/josegonzalez/homebrew-php
+Using the above method you may get an error when trying to run whippet:
 
-### Existing users of MAMP
+    Error: Unable to find file /etc/mime.types, and failed to load fallback
 
-If you already use MAMP and have installed PHP 5.4 via Homebrew, PHP needs to know to use MAMP's MySQL server. To fix this, update your php.ini:
+In which case you can obtain the most recent mime file here: http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types
+Instruct Whippet to use this file using the --mime-file argument, or save it to /etc/mime.types
+
+#### Other operating systems
+For Windows, I think you might be out of luck. If you manage to get it working, we'd love to know what you did.
+
+For other operating systems, please consult Google, or download and install from PHP.net: http://php.net/downloads.php
+
+#### Handling multiple versions of PHP 
+If for some reason you don't want to use 5.4 as your system's version of PHP, make sure your system PHP comes up first in your PATH, 
+and then tell Whippet where to find PHP5.4 on your system:
+   
+    $ WHIPPET_PHP=/path/to/php/5.4 whippet 
+
+### MYSQL
+If you've directly installed MYSQL on your system, Whippet should just work. If you encounter any problems, please raise an issue.
+
+#### MYSQL through MAMP (OSX)
+
+If you're using MAMP, and don't want to install MYSQL directly for whatever reason, you need to tell PHP5.4 how to use MAMP's MySQL server. To fix this, update your php.ini:
 
     $ sudo vi /usr/local/etc/php/5.4/php.ini
 
@@ -57,22 +80,6 @@ And put in the option for mysql.default_socket:
 
     mysql.default_socket = /Applications/MAMP/tmp/mysql/mysql.sock
 
-If you now have more than one version of PHP on your system, you may need to tell Whippet which one to
-use:
-   
-    $ WHIPPET_PHP=/usr/bin/local/php whippet 
-
-If you installed PHP 5.4 using Homebrew then your path may look more like this: /usr/local/Cellar/php54/5.4.7/bin/php
-
-You can check if defining WHIPPET_PHP is necessary by running php -v. It should hopefully be 5.4.x, otherwise you'll need to find the path to the correct install. 
-
-At some point, we will figure out a more elegant solution.
-
-### Other operating systems
-For Windows, I think you might be out of luck. If you manage to get it working, we'd love to know what you did.
-
-For other operating systems, please consult Google, or download and install from PHP.net: http://php.net/downloads.php
-    
 
 Usage
 -----
