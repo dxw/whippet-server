@@ -63,6 +63,7 @@ function parse_arguments(&$argv) {
   $optparser->addRule('h|help');
   $optparser->addRule('i::');
   $optparser->addRule('p::');
+  $optparser->addRule('q');
   $optparser->addRule('multisite');
   $optparser->addRule('mime-file::');
   $optparser->addRule('no-sql');
@@ -115,6 +116,8 @@ Options:
 
   -i <interface address>  Specify an interface to listen on. (Default: localhost)
   -p <port>               Specify a port number to listen on. (Default: 8000)
+
+  -q                      Quiet mode. Suppresses most output.
 
   --multisite             Activate and enable multisite.
 

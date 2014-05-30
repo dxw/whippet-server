@@ -122,6 +122,12 @@ class Whippet {
    * @param String The message
    */
   public static function message($string) {
+    global $whippet;
+  
+    if(isset($whippet->options['q'])) {
+      return;
+    }
+
     if($string[0] == "\n") {
       $string = substr($string, 1);
       file_put_contents("php://stdout", "\n");

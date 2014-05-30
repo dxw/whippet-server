@@ -4,6 +4,11 @@
  * The contents of this file are required from the end of wp-config.php
  */
 
+// There is no point in doing this if we're in quite mode.
+if(isset($whippet->options['q'])) {
+  return;
+}
+
 // Note: The error handling stuff we do seems to override WP_DEBUG
 
 // Save queries so we can print out the execution time
