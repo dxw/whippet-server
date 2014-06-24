@@ -98,9 +98,9 @@ function parse_arguments(&$argv) {
     $p = isset($arguments['p']) ? $arguments['p'] : $defaults['p'];
 
     if ($p == 80) {
-      $defaults['siteurl'] = "http://{$i}";
+      $defaults['siteurl'] = "http://{$i}/";
     } else {
-      $defaults['siteurl'] = "http://{$i}:{$p}";
+      $defaults['siteurl'] = "http://{$i}:{$p}/";
     }
   }
 
