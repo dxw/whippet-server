@@ -372,7 +372,7 @@ $inject  = <<<EOT
 define('WP_CONTENT_DIR', \$whippet->options['wp-content']);
 
 if(!defined('WP_SITEURL')) {
-  define('WP_SITEURL', "http://{\$whippet->options['i']}" . (\$whippet->options['p'] != 80 ? ":{\$whippet->options['p']}/" : ''));
+  define('WP_SITEURL', "{\$whippet->options['siteurl']}");
 }
 
 if(!defined("WP_HOME")) {

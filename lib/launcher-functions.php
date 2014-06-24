@@ -63,6 +63,7 @@ function parse_arguments(&$argv) {
   $optparser->addRule('h|help');
   $optparser->addRule('i::');
   $optparser->addRule('p::');
+  $optparser->addRule('siteurl::');
   $optparser->addRule('q');
   $optparser->addRule('multisite');
   $optparser->addRule('mime-file::');
@@ -92,6 +93,12 @@ function parse_arguments(&$argv) {
 
   $arguments = $optparser->getAllOptions();
 
+  if ((int)$arguments->p === 80) {
+    $defaults['siteurl'] = "http://{$arguments->i}";
+  } else {
+    $defaults['siteurl'] = "http://{$arguments->i}:{$arguments->p}";
+  }
+
   return array_merge($defaults, $arguments);
 }
 
@@ -116,6 +123,7 @@ Options:
 
   -i <interface address>  Specify an interface to listen on. (Default: localhost)
   -p <port>               Specify a port number to listen on. (Default: 8000)
+  --siteurl <URL>         Set WP_SITEURL/WP_HOME. (Default: http://<value of -i>:<value of -p>)
 
   -q                      Quiet mode. Suppresses most output.
 
