@@ -48,7 +48,7 @@ if(empty($_SERVER['HOME'])) {
 $options = parse_arguments($argv);
 
 if (!posix_isatty(STDOUT)) {
-  $options['colours-disable'] = true;
+  $options['not-a-tty'] = true;
 }
 
 // Emit help, if required, and then exit

@@ -10,7 +10,7 @@ if(isset($whippet->options['q'])) {
 }
 
 // Colours
-if (isset($whippet->options['colours-disable'])) {
+if (isset($whippet->options['not-a-tty'])) {
   Colours::disable();
 }
 
