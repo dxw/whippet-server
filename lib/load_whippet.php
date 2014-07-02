@@ -9,6 +9,11 @@ if(isset($whippet->options['q'])) {
   return;
 }
 
+// Colours
+if (isset($whippet->options['colours-disable'])) {
+  Colours::disable();
+}
+
 // Note: The error handling stuff we do seems to override WP_DEBUG
 
 // Save queries so we can print out the execution time

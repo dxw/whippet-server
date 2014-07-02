@@ -33,11 +33,21 @@ class Colours {
     'light_grey' => '47',
   );
 
+  static public function disable() {
+    define('COLOUR_DISABLE', true);
+  }
+
   static public function fg($colour) {
+    if (defined('COLOUR_DISABLE') && COLOUR_DISABLE === true) {
+      return '';
+    }
     return "\033[" . Colours::$foreground[$colour] . "m";
   }
 
   static public function bg($colour) {
+    if (defined('COLOUR_DISABLE') && COLOUR_DISABLE === true) {
+      return '';
+    }
     return "\033[" . Colours::$background[$colour] . "m";
   }
 

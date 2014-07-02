@@ -30,6 +30,11 @@ if(!empty($output[0]) && file_exists(trim($output[0]))) {
 // Timezone
 date_default_timezone_set('UTC');
 
+// Colours
+if (!posix_isatty(STDOUT)) {
+  Colours::disable();
+}
+
 // HOME
 if(empty($_SERVER['HOME'])) {
   echo Colours::fg('brown') . "Warning: " . Colours::fg("white") . "Unable to find a HOME environment variable. Paths containing ~ may not be found .\n";
@@ -41,6 +46,10 @@ if(empty($_SERVER['HOME'])) {
 
 // If the user specified invalid options, this will not return
 $options = parse_arguments($argv);
+
+if (!posix_isatty(STDOUT)) {
+  $options['colours-disable'] = true;
+}
 
 // Emit help, if required, and then exit
 if(isset($options['h']) || isset($options['help'])) {
