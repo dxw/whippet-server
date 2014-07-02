@@ -196,6 +196,7 @@ class Whippet {
 
     // Display the error
     Whippet::message(
+      ($options['not-a-tty'] ? '[ERR] ' : '') . # For clarity when parsed by another program
       Colours::fg('bold_red') .
       $error_type[$number] . 
       Colours::fg('red') .
