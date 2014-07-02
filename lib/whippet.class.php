@@ -133,8 +133,14 @@ class Whippet {
       file_put_contents("php://stdout", "\n");
     }
 
+    $reqid = '';
+    if (isset($_SERVER['HTTP_X_REQ_IDENT'])) {
+      $reqid = ' [req:'.$_SERVER['HTTP_X_REQ_IDENT'].']';
+    }
+
     file_put_contents("php://stdout", 
       Colours::fg('dark_grey') . "[" . date("Y-m-d H:i:s") . "]" .
+      $reqid .
       Colours::fg('white') . " {$string}" . 
       Colours::fg('white') . "\n" );
   }
