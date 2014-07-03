@@ -202,7 +202,7 @@ class Whippet {
 
     // Display the error
     Whippet::message(
-      ($options['not-a-tty'] ? '[ERR] ' : '') . # For clarity when parsed by another program
+      ((isset($options['not-a-tty']) && $options['not-a-tty']) ? '[ERR] ' : '') . # For clarity when parsed by another program
       Colours::fg('bold_red') .
       $error_type[$number] . 
       Colours::fg('red') .
