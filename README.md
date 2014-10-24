@@ -25,11 +25,11 @@ You might also want to symlink Whippet to something in your path:
 
     $ sudo ln -s /path/to/the/script/called/whippet /usr/bin/whippet
 
-### PHP 5.4
+### PHP >= 5.4
 
-Whippet requires PHP 5.4. 
+Whippet requires PHP 5.4 or greater. It must have been compiled with the --enable_pcntl flag otherwise you will see "Call to undefined function pcntl_signal()" errors.
 
-Check which version you're currently using by running php -v. It should hopefully be 5.4.x
+Check which version you're currently using by running php -v.
 
 To install do:
 
