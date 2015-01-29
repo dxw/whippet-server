@@ -427,61 +427,26 @@ if(WPS_LOCATION == 'root') {
   file_put_contents(dirname($options['wp-config']). "/wp-config-original.whippet.bak", $wp_config);
 }
 else if(WPS_LOCATION == 'wp-content') {
-  $new_wp_config = file_get_contents("{$options['wp-content']}/whippet-wp-config.php");
+  $new_wp_config = <<<EOF
+<?php
+require_once("{$options['wp-content']}/whippet-wp-config.php");
 
-  if(strpos('DB_CHARSET', $new_wp_config) === false) {
-    $new_wp_config .= "define('DB_CHARSET', 'utf8');\n";
-  }
+if (!defined('DB_CHARSET'))       define('DB_CHARSET',       'utf8');
+if (!defined('DB_COLLATE'))       define('DB_COLLATE',       '');
+if (!defined('AUTH_KEY'))         define('AUTH_KEY',         'put your unique phrase here');
+if (!defined('SECURE_AUTH_KEY'))  define('SECURE_AUTH_KEY',  'put your unique phrase here');
+if (!defined('LOGGED_IN_KEY'))    define('LOGGED_IN_KEY',    'put your unique phrase here');
+if (!defined('NONCE_KEY'))        define('NONCE_KEY',        'put your unique phrase here');
+if (!defined('AUTH_SALT'))        define('AUTH_SALT',        'put your unique phrase here');
+if (!defined('SECURE_AUTH_SALT')) define('SECURE_AUTH_SALT', 'put your unique phrase here');
+if (!defined('LOGGED_IN_SALT'))   define('LOGGED_IN_SALT',   'put your unique phrase here');
+if (!defined('NONCE_SALT'))       define('NONCE_SALT',       'put your unique phrase here');
+if (!isset(\$table_prefix))       \$table_prefix  =          'wp_';
+if (!defined('WPLANG'))           define('WPLANG',           '');
+if (!defined('ABSPATH'))          define('ABSPATH', dirname(__FILE__) . '/');
 
-  if(strpos('DB_COLLAGE', $new_wp_config) === false) {
-    $new_wp_config .= "define('DB_COLLATE', '');\n";
-  }
-
-  if(strpos('AUTH_KEY', $new_wp_config) === false) {
-    $new_wp_config .= "define('AUTH_KEY',         'put your unique phrase here');\n";
-  }
-
-  if(strpos('SECURE_AUTH_KEY', $new_wp_config) === false) {
-    $new_wp_config .= "define('SECURE_AUTH_KEY',  'put your unique phrase here');\n";
-  }
-
-  if(strpos('LOGGED_IN_KEY', $new_wp_config) === false) {
-    $new_wp_config .= "define('LOGGED_IN_KEY',    'put your unique phrase here');\n";
-  }
-
-  if(strpos('NONCE_KEY', $new_wp_config) === false) {
-    $new_wp_config .= "define('NONCE_KEY',        'put your unique phrase here');\n";
-  }
-
-  if(strpos('AUTH_SALT', $new_wp_config) === false) {
-    $new_wp_config .= "define('AUTH_SALT',        'put your unique phrase here');\n";
-  }
-
-  if(strpos('SECURE_AUTH_SALT', $new_wp_config) === false) {
-    $new_wp_config .= "define('SECURE_AUTH_SALT', 'put your unique phrase here');\n";
-  }
-
-  if(strpos('LOGGED_IN_SALT', $new_wp_config) === false) {
-    $new_wp_config .= "define('LOGGED_IN_SALT',   'put your unique phrase here');\n";
-  }
-
-  if(strpos('NONCE_SALT', $new_wp_config) === false) {
-    $new_wp_config .= "define('NONCE_SALT',       'put your unique phrase here');\n";
-  }
-
-  if(strpos('table_prefix', $new_wp_config) === false) {
-    $new_wp_config .= "\$table_prefix  = 'wp_';\n";
-  }
-
-  if(strpos('WPLANG', $new_wp_config) === false) {
-    $new_wp_config .= "define('WPLANG', '');\n";
-  }
-
-  if(strpos('ABSPATH', $new_wp_config) === false) {
-    $new_wp_config .= "if ( !defined('ABSPATH') )\ndefine('ABSPATH', dirname(__FILE__) . '/');\n";
-  }
-
-  $new_wp_config .= $inject;
+$inject
+EOF;
 
   file_put_contents("{$options['wp-root']}/wp-config.php", $new_wp_config);
 }
