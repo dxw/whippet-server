@@ -81,6 +81,26 @@ And put in the option for mysql.default_socket:
     mysql.default_socket = /Applications/MAMP/tmp/mysql/mysql.sock
 
 
+Docker usage
+------------
+
+Run it on port 80:
+
+    $ docker run -ti --rm -v /path/to/wp-content:/app -p 80:80 thedxw/whippet-server
+
+The default command is "whippet-server -i 0.0.0.0 -p 80 --show-wp-errors --siteurl=http://localhost", so if you need WordPress to put a different domain in absolute URIs, or you want to have it listen on a different port:
+
+    $ docker run -ti --rm -v /path/to/wp-content:/app -p 8000:80 thedxw/whippet-server whippet-server -i 0.0.0.0 -p 80 --show-wp-errors --siteurl=http://mysite.local:8000
+
+(Note that the --siteurl option merely sets the WP_SITEURL and WP_HOME constants - you'll have problems if those are set differently to the equivalent options in the database).
+
+If you're making changes to whippet-server or for whatever reason the image isn't available on dockerhub, you'll need to build it before you do that:
+
+    $ docker build -t thedxw/whippet-server .
+
+The below section includes notes about options which may be useful.
+
+
 Usage
 -----
 
