@@ -23,4 +23,5 @@ RUN ln -s /src/whippet-server/whippet-server /usr/local/bin/whippet-server
 
 VOLUME /app
 EXPOSE 80
-CMD whippet-server -i 0.0.0.0 -p 80 --show-wp-errors --siteurl=http://localhost /app
+WORKDIR /app
+CMD whippet-server -i 0.0.0.0 -p 80 --show-wp-errors --siteurl=http://localhost
