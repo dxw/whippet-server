@@ -4,8 +4,8 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -y dist-upgrade
 
 # get deps
-RUN apt-get install --no-install-recommends -y wget ca-certificates
-RUN apt-get install --no-install-recommends -y php5-cli php5-mysql
+RUN apt-get install --no-install-recommends -y wget ca-certificates git \
+                                               php5-cli php5-mysql
 
 RUN mkdir /src
 
@@ -19,6 +19,7 @@ RUN wget https://wordpress.org/latest.tar.gz -O /src/latest.tar.gz && \
 
 # install whippet-server
 ADD . /src/whippet-server
+RUN git -C /src/whippet-server submodule update --init --recursive
 RUN ln -s /src/whippet-server/whippet-server /usr/local/bin/whippet-server
 
 VOLUME /app
