@@ -47,6 +47,7 @@ function parse_arguments(&$argv) {
     "wordpresses" => $_SERVER['HOME'] . "/.cache/whippet/wordpresses",
     "cb-cache"    => $_SERVER['HOME'] . "/.cache/whippet/callback-cache",
     "multisite"   => false,
+    "config"      => false,
   );
 
   // Are there some options in a config file? Check them in order.
@@ -64,6 +65,7 @@ function parse_arguments(&$argv) {
   $optparser->addRule('i::');
   $optparser->addRule('p::');
   $optparser->addRule('siteurl::');
+  $optparser->addRule('config::');
   $optparser->addRule('q');
   $optparser->addRule('multisite');
   $optparser->addRule('mime-file::');
@@ -129,6 +131,8 @@ Options:
   -i <interface address>  Specify an interface to listen on. (Default: localhost)
   -p <port>               Specify a port number to listen on. (Default: 8000)
   --siteurl <URL>         Set WP_SITEURL/WP_HOME. (Default: http://<value of -i>:<value of -p>)
+  --config <path>         Sets location of whippet-wp-config.php. (Default:
+                          wp-content/whippet-wp-config.php)
 
   -q                      Quiet mode. Suppresses most output.
 
