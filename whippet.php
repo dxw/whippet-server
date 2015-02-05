@@ -427,9 +427,14 @@ if(WPS_LOCATION == 'root') {
   file_put_contents(dirname($options['wp-config']). "/wp-config-original.whippet.bak", $wp_config);
 }
 else if(WPS_LOCATION == 'wp-content') {
+  $config = $options['wp-content'].'/whippet-wp-config.php';
+
+  if ($options['config'] !== false) {
+    $config = $options['config'];
+  }
   $new_wp_config = <<<EOF
 <?php
-require_once("{$options['wp-content']}/whippet-wp-config.php");
+require_once("{$config}");
 
 if (!defined('DB_CHARSET'))       define('DB_CHARSET',       'utf8');
 if (!defined('DB_COLLATE'))       define('DB_COLLATE',       '');
