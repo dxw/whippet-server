@@ -13,15 +13,14 @@ RUN apt-get update \
   && apt-get -y clean
 ENV DEBIAN_FRONTEND newt
 
-RUN mkdir /src
-
-# get WP
-RUN wget https://wordpress.org/latest.tar.gz -O /src/latest.tar.gz && \
-    mkdir -p ~/.cache/whippet/wordpresses/latest && \
-    tar -C ~/.cache/whippet/wordpresses/latest -xzf /src/latest.tar.gz && \
-    mv ~/.cache/whippet/wordpresses/latest/wordpress/* ~/.cache/whippet/wordpresses/latest && \
-    rmdir ~/.cache/whippet/wordpresses/latest/wordpress && \
-    rm /src/latest.tar.gz
+# install wordpress
+RUN mkdir -p /usr/src/wordpress \
+    && wget https://wordpress.org/latest.tar.gz -O /usr/src/wordpress/latest.tar.gz \
+    && mkdir -p ~/.cache/whippet/wordpresses/latest \
+    && tar -C ~/.cache/whippet/wordpresses/latest -xzf /usr/src/wordpress/latest.tar.gz \
+    && mv ~/.cache/whippet/wordpresses/latest/wordpress/* ~/.cache/whippet/wordpresses/latest \
+    && rmdir ~/.cache/whippet/wordpresses/latest/wordpress \
+    && rm /usr/src/wordpress/latest.tar.gz
 
 # install whippet-server
 ADD . /src/whippet-server
