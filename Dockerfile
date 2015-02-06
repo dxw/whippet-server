@@ -31,5 +31,6 @@ RUN git -C /usr/src/whippet-server submodule update --init --recursive \
 ONBUILD COPY . /usr/src/app
 ONBUILD WORKDIR /usr/src/app
 
+# set up running environment for whippet
 EXPOSE 80
-CMD whippet-server -i 0.0.0.0 -p 80 --show-wp-errors --siteurl=http://localhost
+CMD ["whippet-server", "-i", "0.0.0.0", "-p", "80", "--show-wp-errors", "--siteurl=http://localhost"]
