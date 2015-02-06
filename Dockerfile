@@ -1,11 +1,16 @@
 FROM ubuntu:latest
 
+# upgrade debian packages
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get -y dist-upgrade
-
-# get deps
-RUN apt-get install --no-install-recommends -y wget ca-certificates git \
-                                               php5-cli php5-mysql
+RUN apt-get update \
+  && apt-get -y dist-upgrade \
+  && apt-get install --no-install-recommends -y \
+    wget \
+    ca-certificates \
+    git \
+    php5-cli \
+    php5-mysql \
+  && apt-get -y clean
 
 RUN mkdir /src
 
