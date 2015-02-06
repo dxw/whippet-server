@@ -27,7 +27,9 @@ COPY . /usr/src/whippet-server
 RUN git -C /usr/src/whippet-server submodule update --init --recursive \
   && ln -s /usr/src/whippet-server/whippet-server /usr/local/bin/whippet-server
 
-VOLUME /app
+# set up for inheriting projects
+ONBUILD COPY . /usr/src/app
+ONBUILD WORKDIR /usr/src/app
+
 EXPOSE 80
-WORKDIR /app
 CMD whippet-server -i 0.0.0.0 -p 80 --show-wp-errors --siteurl=http://localhost
