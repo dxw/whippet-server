@@ -23,9 +23,9 @@ RUN mkdir -p /usr/src/wordpress \
     && rm /usr/src/wordpress/latest.tar.gz
 
 # install whippet-server
-ADD . /src/whippet-server
-RUN git -C /src/whippet-server submodule update --init --recursive
-RUN ln -s /src/whippet-server/whippet-server /usr/local/bin/whippet-server
+COPY . /usr/src/whippet-server
+RUN git -C /usr/src/whippet-server submodule update --init --recursive \
+  && ln -s /usr/src/whippet-server/whippet-server /usr/local/bin/whippet-server
 
 VOLUME /app
 EXPOSE 80
