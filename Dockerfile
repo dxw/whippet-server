@@ -11,6 +11,7 @@ RUN apt-get update \
     php5-cli \
     php5-mysql \
   && apt-get -y clean
+ENV DEBIAN_FRONTEND newt
 
 RUN mkdir /src
 
