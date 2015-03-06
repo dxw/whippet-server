@@ -10,6 +10,7 @@ RUN apt-get update \
     git \
     php5-cli \
     php5-mysql \
+    php5-gd \
   && apt-get -y clean
 ENV DEBIAN_FRONTEND newt
 
