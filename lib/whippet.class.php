@@ -755,8 +755,9 @@ class Whippet {
 
     $params = array();
     foreach($query->query_vars as $key => $value) {
+      $value = json_encode($value);
       if(!empty($value)) {
-        $params[] = "{$key} => '{$value}'";
+        $params[] = "{$key} => {$value}";
       }
     }
 
