@@ -58,14 +58,14 @@ if(!file_exists($options['mime-file'])) {
 
   if(!file_exists($options['mime-file'])) {
     die_with_error(
-      "Unable to find file {$options['mime-file']}, and failed to load fallback", 
+      "Unable to find file {$options['mime-file']}, and failed to load fallback",
       "You can obtain the most recent mime file here:\n\n  http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types\n\nInstruct Whippet to use this file using the --mime-file argument, or save it to /etc/mime.types");
   }
   else {
     $options['mime-file'] = $local_fallback;
   }
 }
-    
+
 
 // Is the specified port sane?
 if(!preg_match('/\d+/', $options['p']) || $options['p'] > 65536 || $options['p'] < 1) {
@@ -88,7 +88,7 @@ if($options['show-everything']) {
 
   $options['show-wp-hooks'] = true;
   $options['show-wp-errors'] = true;
-  $options['show-wp-queries'] = true; 
+  $options['show-wp-queries'] = true;
   $options['show-hooks'] = '.*';
   $options['show-errors'] = 'E_ALL';
 }
@@ -138,16 +138,16 @@ if((file_exists($options['wp-root'] . '/wp-config.php') || file_exists($options[
 }
 elseif(file_exists($options['wp-root'] . '/themes') && file_exists($options['wp-root'] . '/plugins')){
   //
-  // We are in a wp-content 
+  // We are in a wp-content
   //
   // We need to find a WP core to use.
-  // 
+  //
 
   // Remember where we are
   define("WPS_LOCATION", "wp-content");
 
   $skeleton_whippet_wpconfig = <<<EOT
-<?php 
+<?php
 
 /**
  * This file is used by Whippet when you run this wp-content folder without
@@ -176,9 +176,9 @@ EOT;
 
   // Make sure there's a config we can use
   if(!file_exists($options['wp-root'] . "/whippet-wp-config.php")) {
-    echo 
-      Colours::fg('red') . "Error: " . Colours::fg('white') . 
-      "Couldn't find a configuration file at " . $options['wp-root'] . "/whippet-wp-config.php\n" . 
+    echo
+      Colours::fg('red') . "Error: " . Colours::fg('white') .
+      "Couldn't find a configuration file at " . $options['wp-root'] . "/whippet-wp-config.php\n" .
       "Whippet needs this file in order to know where your database is. You can specify anything\n" .
       "there that you would normally put in wp-config.php. At a minimum, it must contain your\n" .
       "database configuration. Once it's created, you might want to add it to your source\n" .
@@ -202,7 +202,7 @@ EOT;
         system("\$EDITOR {$options['wp-root']}/whippet-wp-config.php > `tty`");
       }
       else {
-        echo 
+        echo
           "Created settings file at {$options['wp-root']}/whippet-wp-config.php, but could\n" .
           "not load your editor because neither \$VISUAL nor \$EDITOR are set. Please add\n" .
           "your database configuration to this file and restart Whippet\n";
@@ -213,7 +213,7 @@ EOT;
     else {
       exit(1);
     }
-  } 
+  }
 }
 else {
   // We could be *anywhere*
@@ -240,7 +240,7 @@ if(WPS_LOCATION == 'root' && !file_exists($options['wp-root'] . '/wp-config.php'
 // If location is wp-content, check that we have some core files, and download them if we don't
 if(WPS_LOCATION == 'wp-content' && !file_exists("{$options['wordpresses']}/{$options['wp-version']}")) {
   echo
-    Colours::fg('red') . "Error: " . Colours::fg('white') . 
+    Colours::fg('red') . "Error: " . Colours::fg('white') .
     "Unable to find the specified WordPress core in your wordpresses directory ({$options['wordpresses']})\n",
     "To run a site from its wp-content folder without it being in a WordPress installation, you need to set up your\n" .
     "core WordPress files in the directory above. Whippet can set this up for you automatically.\n\n";
@@ -264,10 +264,10 @@ if(WPS_LOCATION == 'wp-content' && !file_exists("{$options['wordpresses']}/{$opt
     $tempname = tempnam(sys_get_temp_dir() , ".whippet-") . "-download-wordpress-{$options['wp-version']}";
 
     if($options['wp-version'] == 'latest') {
-      passthru("wget -O '{$tempname}' http://wordpress.org/latest.tar.gz");
+      passthru("curl http://wordpress.org/latest.tar.gz > {$tempname}");
     }
     else {
-      passthru("wget -O '{$tempname}' http://wordpress.org/wordpress-{$options['wp-version']}.tar.gz");
+      passthru("curl http://wordpress.org/wordpress-{$options['wp-version']}.tar.gz > {$tempname}");
     }
 
     passthru("mkdir -p " . $options['wordpresses']);
@@ -284,10 +284,10 @@ if(WPS_LOCATION == 'wp-content' && !file_exists("{$options['wordpresses']}/{$opt
 
     if(!file_exists("{$options['wordpresses']}/{$options['wp-version']}")) {
       die_with_error(
-          "Tried to download WordPress, but something went wrong.", 
+          "Tried to download WordPress, but something went wrong.",
           "Please download the version of WordPress you'd like to use, and extract it to {$options['wordpresses']}/<version>");
     }
-  } 
+  }
   else {
     exit(1);
   }
@@ -311,7 +311,7 @@ function signal_handler($signal) {
   if(file_exists(sys_get_temp_dir() . "/.whippet-arguments")) {
     unlink(sys_get_temp_dir() . "/.whippet-arguments");
   }
- 
+
   // Delete the output buffer
   if(file_exists(sys_get_temp_dir() . "/.whippet-output")) {
     unlink(sys_get_temp_dir() . "/.whippet-output");
@@ -491,7 +491,7 @@ $handle = popen("echo '{$valid_arguments}' | " . PHP_BINARY  . " -S {$options['i
 while(!feof($handle)) {
   $line = fgets($handle);
 
-  // 
+  //
   // Output filters
   // Run any filters that should be run on the output, and decide if we want to display it.
   //

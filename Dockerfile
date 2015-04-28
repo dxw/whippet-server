@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
   && apt-get -y dist-upgrade \
   && apt-get install --no-install-recommends -y \
-    wget \
+    curl \
     ca-certificates \
     git \
     php5-cli \
@@ -16,7 +16,7 @@ ENV DEBIAN_FRONTEND newt
 
 # install wordpress
 RUN mkdir -p /usr/src/wordpress \
-    && wget https://wordpress.org/latest.tar.gz -O /usr/src/wordpress/latest.tar.gz \
+    && curl https://wordpress.org/latest.tar.gz > /usr/src/wordpress/latest.tar.gz \
     && mkdir -p ~/.cache/whippet/wordpresses/latest \
     && tar -C ~/.cache/whippet/wordpresses/latest -xzf /usr/src/wordpress/latest.tar.gz \
     && mv ~/.cache/whippet/wordpresses/latest/wordpress/* ~/.cache/whippet/wordpresses/latest \
