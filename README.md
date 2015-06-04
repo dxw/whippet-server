@@ -2,11 +2,11 @@ Whippet Server
 -------
 
 Whippet Server launches a stand-alone web server for a specific WordPress installation.
-It makes WordPress easier to develop with, for example, by adding lots of debug 
+It makes WordPress easier to develop with, for example, by adding lots of debug
 information to the terminal without cluttering up or breaking your templates.
 
-Whippet Server allows you to run and work on a WordPress website without having to use 
-Apache and without having to set up a virtualhost. You don't even have to have 
+Whippet Server allows you to run and work on a WordPress website without having to use
+Apache and without having to set up a virtualhost. You don't even have to have
 your WordPress files -- Whippet Server will happily run from a wp-content folder by itself.
 
 Note: Whippet Server is Alpha software. We're sure it still has problems that need to be
@@ -20,7 +20,7 @@ Installation
 Clone the repository and run:
 
     $ git submodule update --init
-    
+
 You might also want to symlink Whippet Server to something in your path:
 
     $ sudo ln -s /path/to/the/script/called/whippet-server /usr/bin/whippet-server
@@ -61,11 +61,11 @@ For Windows, I think you might be out of luck. If you manage to get it working, 
 
 For other operating systems, please consult Google, or download and install from PHP.net: http://php.net/downloads.php
 
-#### Handling multiple versions of PHP 
-If for some reason you don't want to use 5.4 as your system's version of PHP, make sure your system PHP comes up first in your PATH, 
+#### Handling multiple versions of PHP
+If for some reason you don't want to use 5.4 as your system's version of PHP, make sure your system PHP comes up first in your PATH,
 and then tell Whippet Server where to find PHP5.4 on your system:
-   
-    $ WHIPPET_PHP=/path/to/php/5.4 whippet 
+
+    $ WHIPPET_PHP=/path/to/php/5.4 whippet
 
 ### MYSQL
 If you've directly installed MYSQL on your system, Whippet Server should just work. If you encounter any problems, please raise an issue.
@@ -122,19 +122,19 @@ For a full listing of Whippet Server's options, do:
     $ /path/to/whippet-server --help
 
 Whippet Server can also make it easier to manage multiple WordPress installations. Instead of having
-to keep a full WordPress installation for each site that you work on, you can just keep the 
+to keep a full WordPress installation for each site that you work on, you can just keep the
 wp-content folder, along with the database for that site:
 
     $ cd /path/to/wp-content
     $ /path/to/whippet-server
 
 Whippet Server will detect that it's being launched from a wp-content folder. The first time you do
-this, it will ask to download and store the latest WordPress core. It'll then use those files 
+this, it will ask to download and store the latest WordPress core. It'll then use those files
 to launch the site. You can also specify the version of WordPress you'd like to use:
 
     $ /path/to/whippet-server --wp-version 4.1
 
-Whippet Server will ask to download the files if they don't already exist, and will prompt you for 
+Whippet Server will ask to download the files if they don't already exist, and will prompt you for
 your database configuration the first time you run it for a particular wp-content diretory.
 
 ### Multisite
@@ -154,16 +154,16 @@ have on listening on port 80.
 After installing on OSX and running whippet-server you get the following error in your browser:
 
     Your PHP installation appears to be missing the MySQL extension which is required by WordPress
- 
-#### Solution:  
+
+#### Solution:
 Reinstall php, ensuring that you include the `--with-mysql` option.
 
 
 Contribute
 ----------
 
-We'd welcome help to make Whippet Server better. If you want to fix a bug or add a feature, 
-please fork the project and Github, make changes, and submit a pull request. If it's 
+We'd welcome help to make Whippet Server better. If you want to fix a bug or add a feature,
+please fork the project and Github, make changes, and submit a pull request. If it's
 something big, you might want to talk to us first. If you need inspiration, check the
 TODO page on the wiki.
 

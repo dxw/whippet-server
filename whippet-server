@@ -2,7 +2,7 @@
 #
 # This script has been lifted, wholesale, from wp-cli:
 # https://github.com/wp-cli/wp-cli.php
-# 
+#
 # Thanks!
 #
 # This script has been adapted from the drush wrapper script
