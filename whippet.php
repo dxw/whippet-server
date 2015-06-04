@@ -1,10 +1,10 @@
 #!/usr/bin/php
 <?php
 
+require dirname(__FILE__) . '/vendor/autoload.php';
 require dirname(__FILE__) . '/lib/colours.class.php';
 require dirname(__FILE__) . '/lib/helpers.php';
 require dirname(__FILE__) . '/lib/whippet.class.php';
-require dirname(__FILE__) . '/lib/optionparser/lib/OptionParser.php';
 require dirname(__FILE__) . '/lib/launcher-functions.php';
 
 //

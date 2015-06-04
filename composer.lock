@@ -1,0 +1,43 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "af264fc25a5822f0b03a953de531b164",
+    "packages": [
+        {
+            "name": "mjackson/optionparser",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mjackson/optionparser.git",
+                "reference": "d6777ad1adb7d09eff1fad79a0f1abbd0761599f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mjackson/optionparser/zipball/d6777ad1adb7d09eff1fad79a0f1abbd0761599f",
+                "reference": "d6777ad1adb7d09eff1fad79a0f1abbd0761599f",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "lib/OptionParser.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "time": "2015-03-17 16:57:12"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "mjackson/optionparser": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

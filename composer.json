@@ -1,0 +1,6 @@
+{
+    "name": "dxw/whippet-server",
+    "require": {
+        "mjackson/optionparser": "dev-master"
+    }
+}
