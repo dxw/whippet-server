@@ -1,6 +1,6 @@
 <?php
 
-/** 
+/**
  * The contents of this file are required from the end of wp-config.php
  */
 

@@ -8,20 +8,20 @@ class Whippet {
 
   /* Stores options passed to the routing script
    */
-  public $options; 
+  public $options;
 
   /* Stores the absolute path to the requested resource.
    *
-   * Note: For a request for a real resource (like a css file) it should be a 
+   * Note: For a request for a real resource (like a css file) it should be a
    * path to an existing file. For a request for a WordPress page, it will not be.
   */
-  public $request_path; 
+  public $request_path;
 
   /* Stores the parsed version of the requested URI.
   */
   public $request_uri;
 
-  /* The type of request we're serving 
+  /* The type of request we're serving
    */
   public $request_type;
 
@@ -55,8 +55,8 @@ class Whippet {
   }
 
   /**
-   * Parse options that are passed to us from stdin.Not sure what the format 
-   * should be yet. To start with, we probably need options to specify the 
+   * Parse options that are passed to us from stdin.Not sure what the format
+   * should be yet. To start with, we probably need options to specify the
    * location of the wordpress installation to run.
    *
    * Eventually it would be nice to be able to start a development version
@@ -69,8 +69,8 @@ class Whippet {
 
     //
     // Sort out options.
-    // Because a routing script can't read command arguments, we need to read 
-    // this from stdin (on the first request) or from the temporary settings 
+    // Because a routing script can't read command arguments, we need to read
+    // this from stdin (on the first request) or from the temporary settings
     // file (on subsequent requests)
     //
 
@@ -92,16 +92,16 @@ class Whippet {
       if(file_put_contents(sys_get_temp_dir() . "/.whippet-arguments", $options) === false) {
         $this->message(
           Colours::fg('bold_red') .
-          "Error: " . 
+          "Error: " .
           Colours::fg('white') .
           "Unable to write options file. This is a serious error. You should probably give up and report a bug.");
       }
     }
-    
+
     if(!$options) {
       $this->message(
         Colours::fg('bold_red') .
-        "Error: " . 
+        "Error: " .
         Colours::fg('white') .
         "Unable to locate options on stdin or on the disk. This is a serious error. You should probably give up and report a bug.");
     }
@@ -111,7 +111,7 @@ class Whippet {
     return unserialize($options);
   }
 
-  /** 
+  /**
    * Emits a message to STDOUT, prepended with the current time.
    *
    * Note: if the first character of the string is a newline, that newline will
@@ -123,7 +123,7 @@ class Whippet {
    */
   public static function message($string) {
     global $whippet;
-  
+
     if(isset($whippet->options['q'])) {
       return;
     }
@@ -133,13 +133,13 @@ class Whippet {
       file_put_contents("php://stdout", "\n");
     }
 
-    file_put_contents("php://stdout", 
+    file_put_contents("php://stdout",
       Colours::fg('dark_grey') . "[" . date("Y-m-d H:i:s") . "]" .
-      Colours::fg('white') . " {$string}" . 
+      Colours::fg('white') . " {$string}" .
       Colours::fg('white') . "\n" );
   }
 
-  
+
   /**
    * Dumps an object to STDOUT, using print_r
    *
@@ -156,7 +156,7 @@ class Whippet {
     $this->message("\nStarted {$_SERVER['REQUEST_METHOD']} " . Colours::fg('green') . "\"{$_SERVER['REQUEST_URI']}\"" . Colours::fg('white') . " for {$_SERVER['REMOTE_ADDR']}");
   }
 
-  /** 
+  /**
    * This function actually emits handled PHP errors. It's here instead of
    * in handle_php_error because we want a static version to be used from
    * the bootstrap script.
@@ -197,7 +197,7 @@ class Whippet {
     // Display the error
     Whippet::message(
       Colours::fg('bold_red') .
-      $error_type[$number] . 
+      $error_type[$number] .
       Colours::fg('red') .
       ": " .
       $error .
@@ -225,7 +225,7 @@ class Whippet {
     return strpos($file, WP_CONTENT_DIR) === false;
   }
 
-  /** 
+  /**
    * Called by the PHP core when an error occurs
    */
   public function handle_php_error($number, $error, $file, $line, $context) {
@@ -234,8 +234,8 @@ class Whippet {
     return true;
   }
 
-  /** 
-   * Called when the command is run. Sets up the options and environment and  
+  /**
+   * Called when the command is run. Sets up the options and environment and
    * then passes off to a more specific handler
    */
   function run() {
@@ -281,7 +281,7 @@ class Whippet {
 
     // Is it a real file, other than the root of the site?
     if($this->request_uri['path'] != '/' && file_exists($this->request_path)) {
-      
+
       // If so, is it PHP that we need to execute?
       if(preg_match('/\.php$/', $this->request_path) && !isset($this->options['no-scripts'])) {
         $this->request_message();
@@ -315,7 +315,7 @@ class Whippet {
    * Note: this function will not serve content-type or content-length headers.
    */
   public function serve_headers() {
-    // TODO: I made these up. I'm not sure they're standards compliant. I'm not 
+    // TODO: I made these up. I'm not sure they're standards compliant. I'm not
     // sure if they set stuff that WP already sets. I'm not sure if I missed things.
 
     header("Date: " . gmdate('D, d-M-Y H:i:s \U\T\C'));
@@ -345,7 +345,7 @@ class Whippet {
         if (substr($line, 0, 1) == '#') {
           continue;
         }
-        
+
         if(preg_match("/^([\w\+\-\.\/]+)\s+(\w+\s)*($extension\s)/i", rtrim($line) . " ", $matches)) {
           $content_type = $matches[1];
           break;
@@ -390,7 +390,7 @@ class Whippet {
     return 'require "' . $this->request_path . '";';
   }
 
-  
+
   /**
    * Serves a wordpress permalink
    */
@@ -453,12 +453,12 @@ class Whippet {
 
     if(isset($in_func)) {
       $file = str_replace($this->options['wp-root'] . "/wp-content/", '', $in_func['file']);
-   
+
       $message .=
-        Colours::fg("white") ."Triggered by function " . 
-        Colours::fg("blue") . "{$in_func['function']}" . 
-        Colours::fg("white") . " called from " . 
-        Colours::fg("brown") . $file . 
+        Colours::fg("white") ."Triggered by function " .
+        Colours::fg("blue") . "{$in_func['function']}" .
+        Colours::fg("white") . " called from " .
+        Colours::fg("brown") . $file .
         Colours::fg("white") . " at line {$in_func['line']}:";
     }
     else {
@@ -524,9 +524,9 @@ class Whippet {
     endif;
 
     $this->message(
-      Colours::fg('yellow') . 
-      "Template load: " . 
-      Colours::fg('white') . 
+      Colours::fg('yellow') .
+      "Template load: " .
+      Colours::fg('white') .
       "wanted {$want_template}, got {$got_template} (" . str_replace($this->options['wp-root'] . "/wp-content/", '', $template) . ")"
     );
 
@@ -537,7 +537,7 @@ class Whippet {
     register_shutdown_function(array($this, "wps_filter_shutdown"));
   }
 
-  /** 
+  /**
    * Runs right at the end of execution
    */
   public function wps_filter_shutdown() {
@@ -591,7 +591,7 @@ class Whippet {
     //
     // Check whether this hook should be displayed
     //
-    
+
     $display = false;
 
     foreach($this->options['show-hooks'] as $show) {
@@ -612,7 +612,7 @@ class Whippet {
     if(empty($wp_filter[$hook]) || !count($wp_filter[$hook])) {
       return;
     }
-    
+
     //
     // Find the callbacks
     //
@@ -705,7 +705,7 @@ class Whippet {
     foreach($backtrace as $i => $value) {
       if($value['function'] == 'apply_filters' || $value['function'] == 'do_action' || $value['function'] == 'apply_filters_ref_array' || $value['function'] == 'do_action_ref_array') {
         $caller = $backtrace[$i + 1];
-        
+
         if($value['function'] == 'apply_filters') {
           $type = "Filter";
         }
@@ -722,16 +722,16 @@ class Whippet {
     // Put together the message
     //
 
-    $message = 
-      Colours::fg('bold_cyan') . "Hook triggered: " . 
-      Colours::fg('white') . "{$type} " . 
-      Colours::fg('cyan') . "{$hook}" . 
-      Colours::fg('white') . " called from function " . 
+    $message =
+      Colours::fg('bold_cyan') . "Hook triggered: " .
+      Colours::fg('white') . "{$type} " .
+      Colours::fg('cyan') . "{$hook}" .
+      Colours::fg('white') . " called from function " .
       Colours::fg('cyan') . "{$caller['function']}";
 
     if(!empty($caller['file'])) {
-      $message .= 
-        Colours::fg("white") . " in " . 
+      $message .=
+        Colours::fg("white") . " in " .
         Colours::fg('brown') . str_replace($this->options['wp-root'], '', $caller['file']);
     }
 
@@ -745,7 +745,7 @@ class Whippet {
     }
   }
 
-  /** 
+  /**
    * Emits page parameters
    */
   public function wps_filter_parse_query($query) {
