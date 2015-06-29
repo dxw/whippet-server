@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:vivid
 
 # upgrade debian packages
 ENV DEBIAN_FRONTEND noninteractive
