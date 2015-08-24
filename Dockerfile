@@ -3,15 +3,15 @@ FROM ubuntu:vivid
 # upgrade debian packages
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
-  && apt-get -y dist-upgrade \
-  && apt-get install --no-install-recommends -y \
-    wget \
-    ca-certificates \
-    git \
-    php5-cli \
-    php5-mysql \
-    php5-gd \
-  && apt-get -y clean
+    && apt-get -y dist-upgrade \
+    && apt-get install --no-install-recommends -y \
+      wget \
+      ca-certificates \
+      git \
+      php5-cli \
+      php5-mysql \
+      php5-gd \
+    && apt-get -y clean
 ENV DEBIAN_FRONTEND newt
 
 # install wordpress
@@ -23,10 +23,15 @@ RUN mkdir -p /usr/src/wordpress \
     && rmdir ~/.cache/whippet/wordpresses/latest/wordpress \
     && rm /usr/src/wordpress/latest.tar.gz
 
+# install composer
+RUN wget --quiet https://getcomposer.org/composer.phar -O /usr/local/bin/composer \
+    && chmod 755 /usr/local/bin/composer
+
 # install whippet-server
 COPY . /usr/src/whippet-server
-RUN git -C /usr/src/whippet-server submodule update --init --recursive \
-  && ln -s /usr/src/whippet-server/whippet-server /usr/local/bin/whippet-server
+RUN cd /usr/src/whippet-server \
+    && composer install \
+    && ln -s /usr/src/whippet-server/whippet-server /usr/local/bin/whippet-server
 
 # set up for inheriting projects
 ONBUILD COPY . /usr/src/app

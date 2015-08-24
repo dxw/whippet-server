@@ -19,7 +19,7 @@ Installation
 
 Clone the repository and run:
 
-    $ git submodule update --init
+    $ composer install
 
 You might also want to symlink Whippet Server to something in your path:
 

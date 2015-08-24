@@ -1,3 +1,0 @@
-[submodule "lib/optionparser"]
-	path = lib/optionparser
-	url = https://github.com/dxw/optionparser.git
