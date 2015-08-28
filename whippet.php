@@ -380,9 +380,11 @@ $inject  = <<<EOT
 
 ////Whippet START
 
-define('WP_CONTENT_DIR', \$whippet->options['wp-content']);
+if (isset(\$whippet)) {
+  define('WP_CONTENT_DIR', \$whippet->options['wp-content']);
+}
 
-if(!defined('WP_SITEURL')) {
+if(!defined('WP_SITEURL') && isset(\$whippet)) {
   define('WP_SITEURL', "{\$whippet->options['siteurl']}");
 }
 
@@ -391,11 +393,13 @@ if(!defined("WP_HOME")) {
 }
 
 define('WP_ALLOW_MULTISITE', true);
-if (\$whippet->options['multisite']) {
+if (isset(\$whippet) && \$whippet->options['multisite']) {
   define('MULTISITE', true);
   define('SUBDOMAIN_INSTALL', false);
   \$base = '/';
-  define('DOMAIN_CURRENT_SITE', \$whippet->options['i']);
+  if (isset(\$whippet)) {
+    define('DOMAIN_CURRENT_SITE', \$whippet->options['i']);
+  }
   define('PATH_CURRENT_SITE', '/');
   define('SITE_ID_CURRENT_SITE', 1);
   define('BLOG_ID_CURRENT_SITE', 1);
