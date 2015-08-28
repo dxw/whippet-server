@@ -407,7 +407,9 @@ define("WP_MEMORY_LIMIT", "512M");
 
 require_once(ABSPATH . 'wp-settings.php');
 
-require_once('{$dir}/lib/load_whippet.php');
+if (isset(\$whippet)) {
+  require_once('{$dir}/lib/load_whippet.php');
+}
 ////Whippet END
 EOT;
 
