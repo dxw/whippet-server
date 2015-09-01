@@ -52,6 +52,17 @@ if(!empty($argv[0])) {
   $options['wp-root'] = $argv[0];
 }
 
+  $config_file = $options['wp-content'].'/whippet-wp-config.php';
+
+  if ($options['config'] !== false) {
+    if (substr($options['config'], 0, 1) === '/') {
+      $config_file = $options['config'];
+    } else {
+      $config_file = getcwd().'/'.$options['config'];
+    }
+  }
+
+
 // Is there a mime.types file?
 if(!file_exists($options['mime-file'])) {
   $local_fallback = dirname(__FILE__) . '/etc/mime.types';
@@ -175,10 +186,10 @@ define('DB_HOST', 'localhost');
 EOT;
 
   // Make sure there's a config we can use
-  if(!file_exists($options['wp-root'] . "/whippet-wp-config.php")) {
+  if(!file_exists($config_file)) {
     echo
       Colours::fg('red') . "Error: " . Colours::fg('white') .
-      "Couldn't find a configuration file at " . $options['wp-root'] . "/whippet-wp-config.php\n" .
+      "Couldn't find a configuration file at " . $config_file . "\n" .
       "Whippet needs this file in order to know where your database is. You can specify anything\n" .
       "there that you would normally put in wp-config.php. At a minimum, it must contain your\n" .
       "database configuration. Once it's created, you might want to add it to your source\n" .
@@ -193,17 +204,17 @@ EOT;
     fclose($fp);
 
     if(strtolower($choice) != 'n') {
-      file_put_contents("{$options['wp-root']}/whippet-wp-config.php", $skeleton_whippet_wpconfig);
+      file_put_contents("{$config_file}", $skeleton_whippet_wpconfig);
 
       if(getenv("VISUAL")) {
-        system("\$VISUAL {$options['wp-root']}/whippet-wp-config.php > `tty`");
+        system("\$VISUAL {$config_file} > `tty`");
       }
       else if(getenv("EDITOR")) {
-        system("\$EDITOR {$options['wp-root']}/whippet-wp-config.php > `tty`");
+        system("\$EDITOR {$config_file} > `tty`");
       }
       else {
         echo
-          "Created settings file at {$options['wp-root']}/whippet-wp-config.php, but could\n" .
+          "Created settings file at {$config_file}, but could\n" .
           "not load your editor because neither \$VISUAL nor \$EDITOR are set. Please add\n" .
           "your database configuration to this file and restart Whippet\n";
 
@@ -222,6 +233,15 @@ else {
     "You must specify a path to a working WordPress installation, or to a wp-content directory:\n" .
     "  whippet /path/to/a/wordpress"
   );
+}
+
+if(WPS_LOCATION == 'wp-content') {
+  // Move wp-root to the actual wordpress root
+  $options['wp-content'] = $options['wp-root'];
+  $options['wp-root'] = "{$options['wordpresses']}/{$options['wp-version']}";
+}
+else {
+  $options['wp-content'] = $options['wp-root'] . '/wp-content';
 }
 
 // Check that the wordpress directory exists
@@ -355,15 +375,6 @@ function signal_handler($signal) {
 
 $dir = dirname(__FILE__);
 
-if(WPS_LOCATION == 'wp-content') {
-  // Move wp-root to the actual wordpress root
-  $options['wp-content'] = $options['wp-root'];
-  $options['wp-root'] = "{$options['wordpresses']}/{$options['wp-version']}";
-}
-else {
-  $options['wp-content'] = $options['wp-root'] . '/wp-content';
-}
-
 
 $inject  = <<<EOT
 
@@ -429,7 +440,7 @@ if(WPS_LOCATION == 'root') {
 else if(WPS_LOCATION == 'wp-content') {
   $new_wp_config = <<<EOF
 <?php
-require_once("{$options['wp-content']}/whippet-wp-config.php");
+require_once("{$config_file}");
 
 if (!defined('DB_CHARSET'))       define('DB_CHARSET',       'utf8');
 if (!defined('DB_COLLATE'))       define('DB_COLLATE',       '');
