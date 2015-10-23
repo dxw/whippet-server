@@ -104,6 +104,7 @@ The below section includes notes about options which may be useful.
 Usage
 -----
 
+### The server
 The simplest way to use Whippet Server is on an existing WordPress installation. If you have
 a working installation, cd to the root of the WordPress installation and do:
 
@@ -113,6 +114,7 @@ You should see the server start. Visit http://localhost:8000 and you should see 
 WordPress website. If you look at your terminal, you'll see quite a bit of output about
 the queries being exected, templates being loaded, and so on.
 
+### Filtering server output 
 Sometimes Whippet Server's output can be a bit too noisy. You can customise what gets displayed:
 
     $ /path/to/whippet-server --no-sql
@@ -120,7 +122,13 @@ Sometimes Whippet Server's output can be a bit too noisy. You can customise what
 For a full listing of Whippet Server's options, do:
 
     $ /path/to/whippet-server --help
+    
+### Output to the console
+A common way to debug WordPress sites is to output to the browser with `var_dump()` or `die()`. When running Whippet you can instead output to the console:
 
+    Whippet::print_r(thing-to-be-output)
+
+### Managing WordPress
 Whippet Server can also make it easier to manage multiple WordPress installations. Instead of having
 to keep a full WordPress installation for each site that you work on, you can just keep the
 wp-content folder, along with the database for that site:
