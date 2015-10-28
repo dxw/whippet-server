@@ -7,7 +7,8 @@ class Helpers
     /**
     * Given an HTTP response code, returns the appropriate text.
     */
-    public static function response_code_text($code) {
+    public static function response_code_text($code)
+    {
         switch ($code) {
             case 100: $text = 'Continue'; break;
             case 101: $text = 'Switching Protocols'; break;

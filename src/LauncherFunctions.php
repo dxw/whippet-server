@@ -4,118 +4,121 @@ namespace Whippet;
 
 class LauncherFunctions
 {
-/**
- * Displays an error message and exits.
- */
-public static function die_with_error($error, $help = '') {
-  echo \Whippet\Colours::fg('red');
-  echo "Error: {$error}\n";
-  echo \Whippet\Colours::fg('white');
+    /**
+    * Displays an error message and exits.
+    */
+    public static function die_with_error($error, $help = '')
+    {
+        echo \Whippet\Colours::fg('red');
+        echo "Error: {$error}\n";
+        echo \Whippet\Colours::fg('white');
 
-  if(!empty($help)) {
-    echo "\n{$help}\n";
-  }
+        if (!empty($help)) {
+            echo "\n{$help}\n";
+        }
 
-  exit(1);
-}
-
-/**
- * Replacement for realpath. This version understands (and will expand) ~
- * It returns the expanded path if it exists, or the unexpanded one if it
- * doesnt. ~ will always be replaced with the contents of $_SERVER['HOME'].
- */
-public static function realpathex($path) {
-  if(strpos('~', $path) !== false) {
-    $path = str_replace('~', $_SERVER['HOME']);
-  }
-
-  if(!file_exists($path)) {
-    return $path;
-  }
-
-  return realpath($path);
-}
-
-public static function parse_arguments(&$argv) {
-  // Default options
-  $defaults = array(
-    'i'           => 'localhost',
-    'p'           => '8000',
-    "mime-file"   => "/etc/mime.types",
-    "wp-root"     => ".",
-    "wp-version"  => "latest",
-    "show-errors" => 'E_ALL',
-    "show-assets" => false,
-    "show-hooks"  => '',
-    "show-everything" => false,
-    "wordpresses" => $_SERVER['HOME'] . "/.cache/whippet/wordpresses",
-    "cb-cache"    => $_SERVER['HOME'] . "/.cache/whippet/callback-cache",
-    "multisite"   => false,
-  );
-
-  // Are there some options in a config file? Check them in order.
-  if(file_exists("/etc/whippetrc")) {
-    $defaults = array_merge($defaults, parse_ini_file("/etc/whippetrc"));
-  }
-
-  if(!empty($_SERVER['HOME']) && file_exists($_SERVER['HOME'] . "/.whippetrc")) {
-    $defaults = array_merge($defaults, parse_ini_file($_SERVER['HOME'] . "/.whippetrc"));
-  }
-
-  $optparser = new \OptionParser;
-
-  $optparser->addRule('h|help');
-  $optparser->addRule('i::');
-  $optparser->addRule('p::');
-  $optparser->addRule('siteurl::');
-  $optparser->addRule('q');
-  $optparser->addRule('multisite');
-  $optparser->addRule('mime-file::');
-  $optparser->addRule('no-sql');
-  $optparser->addRule('no-templates');
-  $optparser->addRule('no-params');
-  $optparser->addRule('no-scripts');
-  $optparser->addRule('show-assets');
-  $optparser->addRule('show-wp-errors');
-  $optparser->addRule('show-wp-queries');
-  $optparser->addRule('show-wp-hooks');
-  $optparser->addRule('show-errors::');
-  $optparser->addRule('show-everything');
-  $optparser->addRule('wp-version::');
-  $optparser->addRule('show-hooks::');
-  $optparser->addRule('wordpresses::');
-
-  try{
-    $argv = $optparser->parse();
-  }
-  catch(Exception $e) {
-    echo \Whippet\Colours::fg('red') . "Error: " . \Whippet\Colours::fg("white") . $e->getMessage() . "\n\n";
-    usage();
-
-    exit(0);
-  }
-
-  $arguments = $optparser->getAllOptions();
-
-  if(!isset($arguments->siteurl)) {
-    $i = isset($arguments['i']) ? $arguments['i'] : $defaults['i'];
-    $p = isset($arguments['p']) ? $arguments['p'] : $defaults['p'];
-
-    if ($p == 80) {
-      $defaults['siteurl'] = "http://{$i}/";
-    } else {
-      $defaults['siteurl'] = "http://{$i}:{$p}/";
+        exit(1);
     }
-  }
 
-  return array_merge($defaults, $arguments);
-}
+    /**
+    * Replacement for realpath. This version understands (and will expand) ~
+    * It returns the expanded path if it exists, or the unexpanded one if it
+    * doesnt. ~ will always be replaced with the contents of $_SERVER['HOME'].
+    */
+    public static function realpathex($path)
+    {
+        if (strpos('~', $path) !== false) {
+            $path = str_replace('~', $_SERVER['HOME']);
+        }
 
-/**
- * Display usage information.
- */
-public static function usage() {
-?>
+        if (!file_exists($path)) {
+            return $path;
+        }
+
+        return realpath($path);
+    }
+
+    public static function parse_arguments(&$argv)
+    {
+        // Default options
+        $defaults = array(
+            'i' => 'localhost',
+            'p' => '8000',
+            'mime-file' => '/etc/mime.types',
+            'wp-root' => '.',
+            'wp-version' => 'latest',
+            'show-errors' => 'E_ALL',
+            'show-assets' => false,
+            'show-hooks' => '',
+            'show-everything' => false,
+            'wordpresses' => $_SERVER['HOME'].'/.cache/whippet/wordpresses',
+            'cb-cache' => $_SERVER['HOME'].'/.cache/whippet/callback-cache',
+            'multisite' => false,
+        );
+
+        // Are there some options in a config file? Check them in order.
+        if (file_exists('/etc/whippetrc')) {
+            $defaults = array_merge($defaults, parse_ini_file('/etc/whippetrc'));
+        }
+
+        if (!empty($_SERVER['HOME']) && file_exists($_SERVER['HOME'].'/.whippetrc')) {
+            $defaults = array_merge($defaults, parse_ini_file($_SERVER['HOME'].'/.whippetrc'));
+        }
+
+        $optparser = new \OptionParser();
+
+        $optparser->addRule('h|help');
+        $optparser->addRule('i::');
+        $optparser->addRule('p::');
+        $optparser->addRule('siteurl::');
+        $optparser->addRule('q');
+        $optparser->addRule('multisite');
+        $optparser->addRule('mime-file::');
+        $optparser->addRule('no-sql');
+        $optparser->addRule('no-templates');
+        $optparser->addRule('no-params');
+        $optparser->addRule('no-scripts');
+        $optparser->addRule('show-assets');
+        $optparser->addRule('show-wp-errors');
+        $optparser->addRule('show-wp-queries');
+        $optparser->addRule('show-wp-hooks');
+        $optparser->addRule('show-errors::');
+        $optparser->addRule('show-everything');
+        $optparser->addRule('wp-version::');
+        $optparser->addRule('show-hooks::');
+        $optparser->addRule('wordpresses::');
+
+        try {
+            $argv = $optparser->parse();
+        } catch (Exception $e) {
+            echo \Whippet\Colours::fg('red').'Error: '.\Whippet\Colours::fg('white').$e->getMessage()."\n\n";
+            usage();
+
+            exit(0);
+        }
+
+        $arguments = $optparser->getAllOptions();
+
+        if (!isset($arguments->siteurl)) {
+            $i = isset($arguments['i']) ? $arguments['i'] : $defaults['i'];
+            $p = isset($arguments['p']) ? $arguments['p'] : $defaults['p'];
+
+            if ($p == 80) {
+                $defaults['siteurl'] = "http://{$i}/";
+            } else {
+                $defaults['siteurl'] = "http://{$i}:{$p}/";
+            }
+        }
+
+        return array_merge($defaults, $arguments);
+    }
+
+    /**
+    * Display usage information.
+    */
+    public static function usage()
+    {
+        ?>
 Whippet launches a stand-alone web server for a specific WordPress installation.
 It makes WordPress easier to develop with, for example, by adding lots of debug
 information to the terminal without cluttering up or breaking your templates.
@@ -218,8 +221,8 @@ Setting Defaults:
 Feedback and help:
 
   Visit Github and check the wiki, open an issue or send us a message: https://github.com/dxw/whippet
-<?php
+        <?php
 
-  exit(0);
-}
+        exit(0);
+    }
 }
