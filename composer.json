@@ -2,5 +2,10 @@
     "name": "dxw/whippet-server",
     "require": {
         "mjackson/optionparser": "dev-master"
+    },
+    "autoload": {
+      "psr-4": {
+        "Whippet\\": "src/"
+      }
     }
 }

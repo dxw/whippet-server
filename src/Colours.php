@@ -1,5 +1,7 @@
 <?php
 
+namespace Whippet;
+
 class Colours {
   /* Colours
   */
@@ -34,11 +36,11 @@ class Colours {
   );
 
   static public function fg($colour) {
-    return "\033[" . Colours::$foreground[$colour] . "m";
+    return "\033[" . self::$foreground[$colour] . "m";
   }
 
   static public function bg($colour) {
-    return "\033[" . Colours::$background[$colour] . "m";
+    return "\033[" . self::$background[$colour] . "m";
   }
 
   static public function highlight_sql($sql) {
@@ -94,7 +96,7 @@ class Colours {
     //
 
     foreach($sql_keywords as $keyword) {
-      $sql = preg_replace('/\b' . $keyword . '\b/', Colours::fg('bold_cyan') . $keyword . Colours::fg('white'), $sql);
+      $sql = preg_replace('/\b' . $keyword . '\b/', self::fg('bold_cyan') . $keyword . self::fg('white'), $sql);
     }
 
     //
@@ -105,7 +107,7 @@ class Colours {
     global $wpdb;
 
     foreach($wp_tables as $table) {
-      $sql = preg_replace('/\b(' . $wpdb->prefix . '(\d+_)?'  . $table . ')\b/', Colours::fg('purple') . '\\1' . Colours::fg('white'), $sql);
+      $sql = preg_replace('/\b(' . $wpdb->prefix . '(\d+_)?'  . $table . ')\b/', self::fg('purple') . '\\1' . self::fg('white'), $sql);
     }
 
     return $sql;

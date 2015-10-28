@@ -1,5 +1,7 @@
 <?php
 
+namespace Whippet;
+
 class CallbackCache {
 
   /* Used to store details of cached callbacks

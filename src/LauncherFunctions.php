@@ -1,12 +1,16 @@
 <?php
 
+namespace Whippet;
+
+class LauncherFunctions
+{
 /**
  * Displays an error message and exits.
  */
-function die_with_error($error, $help = '') {
-  echo Colours::fg('red');
+public static function die_with_error($error, $help = '') {
+  echo \Whippet\Colours::fg('red');
   echo "Error: {$error}\n";
-  echo Colours::fg('white');
+  echo \Whippet\Colours::fg('white');
 
   if(!empty($help)) {
     echo "\n{$help}\n";
@@ -20,7 +24,7 @@ function die_with_error($error, $help = '') {
  * It returns the expanded path if it exists, or the unexpanded one if it
  * doesnt. ~ will always be replaced with the contents of $_SERVER['HOME'].
  */
-function realpathex($path) {
+public static function realpathex($path) {
   if(strpos('~', $path) !== false) {
     $path = str_replace('~', $_SERVER['HOME']);
   }
@@ -32,7 +36,7 @@ function realpathex($path) {
   return realpath($path);
 }
 
-function parse_arguments(&$argv) {
+public static function parse_arguments(&$argv) {
   // Default options
   $defaults = array(
     'i'           => 'localhost',
@@ -58,7 +62,7 @@ function parse_arguments(&$argv) {
     $defaults = array_merge($defaults, parse_ini_file($_SERVER['HOME'] . "/.whippetrc"));
   }
 
-  $optparser = new OptionParser;
+  $optparser = new \OptionParser;
 
   $optparser->addRule('h|help');
   $optparser->addRule('i::');
@@ -85,7 +89,7 @@ function parse_arguments(&$argv) {
     $argv = $optparser->parse();
   }
   catch(Exception $e) {
-    echo Colours::fg('red') . "Error: " . Colours::fg("white") . $e->getMessage() . "\n\n";
+    echo \Whippet\Colours::fg('red') . "Error: " . \Whippet\Colours::fg("white") . $e->getMessage() . "\n\n";
     usage();
 
     exit(0);
@@ -110,7 +114,7 @@ function parse_arguments(&$argv) {
 /**
  * Display usage information.
  */
-function usage() {
+public static function usage() {
 ?>
 Whippet launches a stand-alone web server for a specific WordPress installation.
 It makes WordPress easier to develop with, for example, by adding lots of debug
@@ -217,4 +221,5 @@ Feedback and help:
 <?php
 
   exit(0);
+}
 }
