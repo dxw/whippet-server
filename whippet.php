@@ -56,7 +56,7 @@ if(!empty($argv[0])) {
 if(!file_exists($options['mime-file'])) {
   $local_fallback = dirname(__FILE__) . '/etc/mime.types';
 
-  if(!file_exists($options['mime-file'])) {
+  if(!file_exists($local_fallback)) {
     die_with_error(
       "Unable to find file {$options['mime-file']}, and failed to load fallback",
       "You can obtain the most recent mime file here:\n\n  http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types\n\nInstruct Whippet to use this file using the --mime-file argument, or save it to /etc/mime.types");
