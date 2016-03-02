@@ -476,7 +476,7 @@ else {
   echo "Using a WordPress core at: {$options['wp-root']}\n";
 }
 
-echo "Listening on {$options['i']}:{$options['p']}\n";
+echo "Listening on http://{$options['i']}:{$options['p']}\n";
 echo "Press Ctrl-C to quit.\n";
 
 //
