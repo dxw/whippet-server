@@ -176,7 +176,7 @@ EOT;
 
   // Make sure there's a config we can use
   if(file_exists($options['wp-root'] . "/../wp-config.php")) {
-    system("ln -s " . realpath($options['wp-root'] . "/../wp-config.php") . " {$options['wp-root']}/whippet-wp-config.php");
+    symlink(realpath($options['wp-root'] . "/../wp-config.php"), "{$options['wp-root']}/whippet-wp-config.php");
   }
   elseif(!file_exists($options['wp-root'] . "/whippet-wp-config.php")) {
     echo
