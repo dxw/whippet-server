@@ -123,6 +123,17 @@ For a full listing of Whippet Server's options, do:
 
     $ /path/to/whippet-server --help
     
+#### Setting Defaults
+
+Any of these options can be set as defaults for Whippet by creating `~/.whippetrc` or `/etc/whippetrc`. Both files will be read if present. Your local defaults will override system-wide defaults. The file should be in ini format:
+
+```ini
+p = 8080
+i = my-machine.local
+show-wp-errors = true
+; this is a comment
+```
+
 ### Output to the console
 A common way to debug WordPress sites is to output to the browser with `var_dump()` or `die()`. When running Whippet you can instead output to the console:
 
