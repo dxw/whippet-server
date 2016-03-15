@@ -175,7 +175,10 @@ define('DB_HOST', 'localhost');
 EOT;
 
   // Make sure there's a config we can use
-  if(!file_exists($options['wp-root'] . "/whippet-wp-config.php")) {
+  if(file_exists($options['wp-root'] . "/../wp-config.php")) {
+    symlink(realpath($options['wp-root'] . "/../wp-config.php"), "{$options['wp-root']}/whippet-wp-config.php");
+  }
+  elseif(!file_exists($options['wp-root'] . "/whippet-wp-config.php")) {
     echo
       Colours::fg('red') . "Error: " . Colours::fg('white') .
       "Couldn't find a configuration file at " . $options['wp-root'] . "/whippet-wp-config.php\n" .
@@ -238,7 +241,7 @@ if(WPS_LOCATION == 'root' && !file_exists($options['wp-root'] . '/wp-config.php'
 }
 
 // If location is wp-content, check that we have some core files, and download them if we don't
-if(WPS_LOCATION == 'wp-content' && !file_exists("{$options['wordpresses']}/{$options['wp-version']}")) {
+if(WPS_LOCATION == 'wp-content' && !file_exists("{$options['wordpresses']}/{$options['wp-version']}") && !file_exists($options['wp-root'] . '/../wp-config.php')) {
   echo
     Colours::fg('red') . "Error: " . Colours::fg('white') .
     "Unable to find the specified WordPress core in your wordpresses directory ({$options['wordpresses']})\n",
@@ -340,7 +343,9 @@ function signal_handler($signal) {
     }
   }
   else if(WPS_LOCATION == 'wp-content') {
-    unlink("{$options['wp-root']}/wp-config.php");
+    if(file_exists("{$options['wordpresses']}/{$options['wp-version']}/wp-config.php")) {
+      unlink("{$options['wordpresses']}/{$options['wp-version']}/wp-config.php");
+    }
   }
 
   echo "\nQuitting.\n\033[0m";
@@ -358,7 +363,11 @@ $dir = dirname(__FILE__);
 if(WPS_LOCATION == 'wp-content') {
   // Move wp-root to the actual wordpress root
   $options['wp-content'] = $options['wp-root'];
-  $options['wp-root'] = "{$options['wordpresses']}/{$options['wp-version']}";
+  if(file_exists($options['wp-root'] . '/../wp-config.php')) {
+    $options['wp-root'] = dirname($options['wp-root']);
+  } else {
+    $options['wp-root'] = "{$options['wordpresses']}/{$options['wp-version']}";
+  }
 }
 else {
   $options['wp-content'] = $options['wp-root'] . '/wp-content';
