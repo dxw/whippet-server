@@ -410,7 +410,7 @@ require_once('{$dir}/lib/load_whippet.php');
 EOT;
 
 // Get the config
-if(WPS_LOCATION == 'root') {
+if(WPS_LOCATION == 'root'||(WPS_LOCATION == 'wp-content' && file_exists($options['wp-root'] . "/wp-config.php"))) {
   if(file_exists($options['wp-root'] . "/wp-config.php")) {
     $options['wp-config'] = $options['wp-root'] . "/wp-config.php";
   }
