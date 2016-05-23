@@ -1,4 +1,4 @@
-FROM ubuntu:vivid
+FROM ubuntu:xenial
 
 # upgrade debian packages
 ENV DEBIAN_FRONTEND noninteractive
@@ -8,10 +8,10 @@ RUN apt-get update \
       wget \
       ca-certificates \
       git \
-      php5-cli \
-      php5-mysql \
-      php5-gd \
-      php5-curl \
+      php7.0-cli \
+      php7.0-mysql \
+      php7.0-gd \
+      php7.0-curl \
     && apt-get -y clean
 ENV DEBIAN_FRONTEND newt
 
