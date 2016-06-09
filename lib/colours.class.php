@@ -33,6 +33,10 @@ class Colours {
     'light_grey' => '47',
   );
 
+  static public function off() {
+    return "\033[m";
+  }
+
   static public function fg($colour) {
     return "\033[" . Colours::$foreground[$colour] . "m";
   }
