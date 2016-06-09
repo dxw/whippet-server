@@ -180,7 +180,7 @@ EOT;
   }
   elseif(!file_exists($options['wp-root'] . "/whippet-wp-config.php")) {
     echo
-      Colours::fg('red') . "Error: " . Colours::fg('white') .
+      Colours::fg('red') . "Error: " . Colours::off() .
       "Couldn't find a configuration file at " . $options['wp-root'] . "/whippet-wp-config.php\n" .
       "Whippet needs this file in order to know where your database is. You can specify anything\n" .
       "there that you would normally put in wp-config.php. At a minimum, it must contain your\n" .
@@ -243,7 +243,7 @@ if(WPS_LOCATION == 'root' && !file_exists($options['wp-root'] . '/wp-config.php'
 // If location is wp-content, check that we have some core files, and download them if we don't
 if(WPS_LOCATION == 'wp-content' && !file_exists("{$options['wordpresses']}/{$options['wp-version']}") && !file_exists($options['wp-root'] . '/../wp-config.php')) {
   echo
-    Colours::fg('red') . "Error: " . Colours::fg('white') .
+    Colours::fg('red') . "Error: " . Colours::off() .
     "Unable to find the specified WordPress core in your wordpresses directory ({$options['wordpresses']})\n",
     "To run a site from its wp-content folder without it being in a WordPress installation, you need to set up your\n" .
     "core WordPress files in the directory above. Whippet can set this up for you automatically.\n\n";
@@ -335,7 +335,7 @@ function signal_handler($signal) {
     else {
       if(WPS_LOCATION == 'root') {
         Whippet::message(
-          Colours::fg('red') . "Error: " . Colours::fg('white') . "Unable to find wp-config backup file; could not restore original configuration",
+          Colours::fg('red') . "Error: " . Colours::off() . "Unable to find wp-config backup file; could not restore original configuration",
           "Your wp-config file should have been backed up at " . dirname($options['wp-config']). "/wp-config-original.whippet.bak, but\n" .
           "it is missing or unreadable. You should edit your wp-config.php by hand to remove the\n" .
           "Whippet sections.\n");
@@ -474,7 +474,7 @@ echo "\nNote: Whippet is Alpha software. We're sure it still has problems that n
 echo "fixed, and we know the install process is a bit labourious. Please do let us know\n";
 echo "how you get on, or open an issue on GitHub if you have problems. Thanks!\n\n";
 
-echo Colours::fg('white');
+echo Colours::off();
 echo "Written and maintained by dxw. Visit http://whippet.labs.dxw.com for more information.\n";
 
 if(WPS_LOCATION == 'root') {
@@ -519,7 +519,7 @@ while(!feof($handle)) {
 
   // Other stuff that comes out of PHP -S (only seen invalid request warnings so far)
   if(preg_match('/\[\w\w\w \w\w\w [\d\s:]+\] (.+)$/', $line, $matches)) {
-    Whippet::message(Colours::fg('blue') . "Server: " . Colours::fg('white') . $matches[1]);
+    Whippet::message(Colours::fg('blue') . "Server: " . Colours::off() . $matches[1]);
     continue;
   }
 

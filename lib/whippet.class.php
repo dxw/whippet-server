@@ -50,7 +50,7 @@ class Whippet {
     $this->cb_cache = new CallbackCache($this->options);
 
     if(!$this->cb_cache->load($this->options['cb-cache'])) {
-      $this->message(Colours::fg('brown') . "Warning: " . Colours::fg('white') . "Unable to load or create callback cache file {$this->options['cb-cache']}. Displaying hook data will be slow.");
+      $this->message(Colours::fg('brown') . "Warning: " . Colours::off() . "Unable to load or create callback cache file {$this->options['cb-cache']}. Displaying hook data will be slow.");
     }
   }
 
@@ -93,7 +93,7 @@ class Whippet {
         $this->message(
           Colours::fg('bold_red') .
           "Error: " .
-          Colours::fg('white') .
+          Colours::off() .
           "Unable to write options file. This is a serious error. You should probably give up and report a bug.");
       }
     }
@@ -102,7 +102,7 @@ class Whippet {
       $this->message(
         Colours::fg('bold_red') .
         "Error: " .
-        Colours::fg('white') .
+        Colours::off() .
         "Unable to locate options on stdin or on the disk. This is a serious error. You should probably give up and report a bug.");
     }
 
@@ -135,8 +135,8 @@ class Whippet {
 
     file_put_contents("php://stdout",
       Colours::fg('dark_grey') . "[" . date("Y-m-d H:i:s") . "]" .
-      Colours::fg('white') . " {$string}" .
-      Colours::fg('white') . "\n" );
+      Colours::off() . " {$string}" .
+      Colours::off() . "\n" );
   }
 
 
@@ -153,7 +153,7 @@ class Whippet {
    * Prints basic information about the request being processed
    */
   public function request_message() {
-    $this->message("\nStarted {$_SERVER['REQUEST_METHOD']} " . Colours::fg('green') . "\"{$_SERVER['REQUEST_URI']}\"" . Colours::fg('white') . " for {$_SERVER['REMOTE_ADDR']}");
+    $this->message("\nStarted {$_SERVER['REQUEST_METHOD']} " . Colours::fg('green') . "\"{$_SERVER['REQUEST_URI']}\"" . Colours::off() . " for {$_SERVER['REMOTE_ADDR']}");
   }
 
   /**
@@ -205,7 +205,7 @@ class Whippet {
       " in " .
       $file .
       " at line {$line}" .
-      Colours::fg("white")
+      Colours::off()
     );
 
     // Show a notification, if we've got libnotify
@@ -455,11 +455,11 @@ class Whippet {
       $file = str_replace($this->options['wp-root'] . "/wp-content/", '', $in_func['file']);
 
       $message .=
-        Colours::fg("white") ."Triggered by function " .
+        Colours::off() ."Triggered by function " .
         Colours::fg("blue") . "{$in_func['function']}" .
-        Colours::fg("white") . " called from " .
+        Colours::off() . " called from " .
         Colours::fg("brown") . $file .
-        Colours::fg("white") . " at line {$in_func['line']}:";
+        Colours::off() . " at line {$in_func['line']}:";
     }
     else {
 
@@ -526,7 +526,7 @@ class Whippet {
     $this->message(
       Colours::fg('yellow') .
       "Template load: " .
-      Colours::fg('white') .
+      Colours::off() .
       "wanted {$want_template}, got {$got_template} (" . str_replace($this->options['wp-root'] . "/wp-content/", '', $template) . ")"
     );
 
@@ -639,7 +639,7 @@ class Whippet {
           continue;
         }
 
-        $callback_message =  "\t{$priority}: " . Colours::fg('cyan') . $function .  Colours::fg('white');
+        $callback_message =  "\t{$priority}: " . Colours::fg('cyan') . $function .  Colours::off();
         $callback_data = $this->cb_cache->lookup($function);
 
         if(!$callback_data) {
@@ -670,7 +670,7 @@ class Whippet {
             $callback_data['file'] = str_replace($this->options['wp-content'], '', $callback_data['file']);
           }
 
-          $callback_message .= " in " . Colours::fg("brown") . str_replace($this->options['wp-root'] . "/wp-content/", '', $callback_data['file']) . Colours::fg("white") . " at line {$callback_data['line']}";
+          $callback_message .= " in " . Colours::fg("brown") . str_replace($this->options['wp-root'] . "/wp-content/", '', $callback_data['file']) . Colours::off() . " at line {$callback_data['line']}";
         }
         else {
           $callback_message .= " (couldn't find this function's definition)";
@@ -724,22 +724,22 @@ class Whippet {
 
     $message =
       Colours::fg('bold_cyan') . "Hook triggered: " .
-      Colours::fg('white') . "{$type} " .
+      Colours::off() . "{$type} " .
       Colours::fg('cyan') . "{$hook}" .
-      Colours::fg('white') . " called from function " .
+      Colours::off() . " called from function " .
       Colours::fg('cyan') . "{$caller['function']}";
 
     if(!empty($caller['file'])) {
       $message .=
-        Colours::fg("white") . " in " .
+        Colours::off() . " in " .
         Colours::fg('brown') . str_replace($this->options['wp-root'], '', $caller['file']);
     }
 
     if(!empty($caller['line'])) {
-      $message .= Colours::fg("white") . " at line {$caller['line']}";
+      $message .= Colours::off() . " at line {$caller['line']}";
     }
 
-    $this->message("{$message}" . Colours::fg('white'));
+    $this->message("{$message}" . Colours::off());
     foreach($callback_messages as $callback_message) {
       $this->message($callback_message);
     }

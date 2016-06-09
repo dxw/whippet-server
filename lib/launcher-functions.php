@@ -6,7 +6,7 @@
 function die_with_error($error, $help = '') {
   echo Colours::fg('red');
   echo "Error: {$error}\n";
-  echo Colours::fg('white');
+  echo Colours::off();
 
   if(!empty($help)) {
     echo "\n{$help}\n";
