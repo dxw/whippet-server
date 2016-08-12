@@ -1,6 +1,7 @@
 {
     "name": "dxw/whippet-server",
     "require": {
-        "mjackson/optionparser": "dev-master"
+        "mjackson/optionparser": "dev-master",
+        "sabre/uri": "^1.1"
     }
 }
