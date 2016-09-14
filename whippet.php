@@ -378,6 +378,41 @@ $inject  = <<<EOT
 
 ////Whippet START
 
+// If whippet-server has wrapped the WordPress instance, WPS_XY has been defined already.
+if (defined('WPS_LOCATION')) {
+  define('WP_CONTENT_DIR', \$whippet->options['wp-content']);
+  if(!defined('WP_SITEURL')) {
+    define('WP_SITEURL', "{\$whippet->options['siteurl']}");
+  }
+  if(!defined("WP_HOME")) {
+    define('WP_HOME', WP_SITEURL);
+  }
+  define('WP_ALLOW_MULTISITE', true);
+  if (\$whippet->options['multisite']) {
+    define('MULTISITE', true);
+    define('SUBDOMAIN_INSTALL', false);
+    \$base = '/';
+    define('DOMAIN_CURRENT_SITE', \$whippet->options['i']);
+    define('PATH_CURRENT_SITE', '/');
+    define('SITE_ID_CURRENT_SITE', 1);
+    define('BLOG_ID_CURRENT_SITE', 1);
+  }
+  // Set some useful constants
+  define("WP_MAX_MEMORY_LIMIT", "512M");
+  define("WP_MEMORY_LIMIT", "512M");
+  require_once(ABSPATH . 'wp-settings.php');
+  require_once('{$dir}/lib/load_whippet.php');
+}
+else {
+  // If whippet-server has not wrapped the code yet i.e. wp-cli runs standalone
+  require_once(ABSPATH . 'wp-settings.php');
+}
+////Whippet END
+EOT;
+
+
+
+
 define('WP_CONTENT_DIR', \$whippet->options['wp-content']);
 
 if(!defined('WP_SITEURL')) {
