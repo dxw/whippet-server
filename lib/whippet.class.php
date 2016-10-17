@@ -1,5 +1,6 @@
 <?php
 
+require __DIR__ . '/../vendor/autoload.php';
 require dirname(__FILE__) . '/callback-cache.class.php';
 
 define('WPS_VERSION', '0.1 ALPHA');
@@ -17,7 +18,7 @@ class Whippet {
   */
   public $request_path;
 
-  /* Stores the parsed version of the requested URI.
+  /* Stores the normalised version of the requested URI's path component.
   */
   public $request_uri;
 
@@ -243,22 +244,24 @@ class Whippet {
     // Fetch options and set up the environment
     //
 
-    $this->request_uri = parse_url($_SERVER['REQUEST_URI']);
+    $u = $_SERVER['REQUEST_URI'];
+    $this->request_uri = \Sabre\Uri\parse($u);
+    $this->requested_path = \Sabre\Uri\normalize($this->request_uri['path']);
 
     // Is this a Multisite install?
     if($this->options['multisite']) {
       // We're in a Multisite install. There are a couple of extra steps. Or just one?
-      if(preg_match('/^\/[_0-9a-zA-Z-]+\/(wp-(content|admin|includes).*)/', $this->request_uri['path'], $matches)) {
-        $this->request_uri['path'] = "/" . $matches[1];
+      if(preg_match('/^\/[_0-9a-zA-Z-]+\/(wp-(content|admin|includes).*)/', $this->requested_path, $matches)) {
+        $this->requested_path = "/" . $matches[1];
       }
 
       // TODO: Is there anything else we need to do?
     }
 
-    if ($this->startswith($this->request_uri['path'], '/wp-content/')) {
-      $this->request_path = $this->options['wp-content'] . substr($this->request_uri['path'], 11);
+    if ($this->startswith($this->requested_path, '/wp-content/')) {
+        $this->request_path = $this->options['wp-content'] . substr($this->requested_path, 11);
     } else {
-      $this->request_path = $this->options['wp-root'] . $this->request_uri['path'];
+      $this->request_path = $this->options['wp-root'] . $this->requested_path;
     }
 
     // If the path is to a directory, append the default document
@@ -280,7 +283,7 @@ class Whippet {
     $this->start_time = microtime(true);
 
     // Is it a real file, other than the root of the site?
-    if($this->request_uri['path'] != '/' && file_exists($this->request_path)) {
+    if($this->request_path != '/' && file_exists($this->request_path)) {
 
       // If so, is it PHP that we need to execute?
       if(preg_match('/\.php$/', $this->request_path) && !isset($this->options['no-scripts'])) {
@@ -304,7 +307,7 @@ class Whippet {
 
     // It's not a real file, and Multisite is not enabled, so it must be a wordpress permalink. Execute index.php
     $this->request_message();
-    $this->message("Processing {$this->request_uri['path']}");
+    $this->message("Processing {$this->request_path}");
     return $this->serve_wordpress();
   }
 
@@ -555,7 +558,7 @@ class Whippet {
 
     $query_time = 0;
     $num_queries = 0;
-    $request = "Served asset {$this->request_uri['path']} -";
+    $request = "Served asset {$this->requested_path} -";
 
     if(isset($wpdb) && is_array($wpdb->queries)) {
       foreach($wpdb->queries as $query) {
